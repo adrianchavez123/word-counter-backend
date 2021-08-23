@@ -1,7 +1,5 @@
 const express = require("express");
-
 const Exercise = require("../models/Exercise");
-// const checkAuth = require("../middleware/check-auth");
 const checkAuth = (req, res, next) => next();
 const router = express.Router();
 
@@ -11,6 +9,7 @@ router.post("", checkAuth, (req, res, next) => {
     description: req.body.description,
     words_amount: req.body.words_amount,
     professor_id: req.body.professor_id,
+    exercise_image: req.body.exercise_image,
   });
   exercise.save().then((createdExercise) => {
     res.status(201).json({

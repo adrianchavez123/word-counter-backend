@@ -34,6 +34,7 @@ CREATE TABLE EXERCISES(
     description text null,
     words_amount int null,
     professor_id int not null,
+    exercise_image varchar(250),
     active boolean not null,
     FOREIGN KEY (professor_id) REFERENCES PROFESSORS (professor_id)
 )ENGINE = InnoDB;

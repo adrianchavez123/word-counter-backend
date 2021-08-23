@@ -1,18 +1,26 @@
 const Connection = require("./Connection");
-
+const formatDate = require("../utils/data-utils");
+const { staticImageURL } = require("../../config");
 class Exercise {
-  constructor({ title, description, words_amount, professor_id }) {
+  constructor({
+    title,
+    description,
+    words_amount,
+    professor_id,
+    exercise_image,
+  }) {
     this.title = title;
     this.description = description;
     this.words_amount = words_amount;
     this.professor_id = professor_id;
+    this.exercise_image = exercise_image;
   }
 
   static findById = (id) => {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT exercise_id, title, description, words_amount, professor_id FROM `EXERCISES` WHERE `exercise_id` = ?  AND active='1' ",
+        "SELECT exercise_id, title, description, words_amount, professor_id, exercise_image FROM `EXERCISES` WHERE `exercise_id` = ?  AND active='1' ",
         [id],
         function (error, results, fields) {
           if (error) {
@@ -37,7 +45,7 @@ class Exercise {
 
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT exercise_id, title, description, words_amount, professor_id FROM `EXERCISES` " +
+        "SELECT exercise_id, title, description, words_amount, professor_id, exercise_image FROM `EXERCISES` " +
           filters,
         [1],
         function (error, results, fields) {
@@ -78,8 +86,12 @@ class Exercise {
       description: this.description,
       words_amount: this.words_amount,
       professor_id: this.professor_id,
+      exercise_image: this.exercise_image
+        ? staticImageURL + formatDate(Date.now()) + "_" + this.exercise_image
+        : null,
       active: true,
     };
+
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
