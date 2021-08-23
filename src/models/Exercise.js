@@ -87,7 +87,10 @@ class Exercise {
       words_amount: this.words_amount,
       professor_id: this.professor_id,
       exercise_image: this.exercise_image
-        ? staticImageURL + formatDate(Date.now()) + "_" + this.exercise_image
+        ? staticImageURL +
+          formatDate(Date.now()) +
+          "_" +
+          this.exercise_image.replace(/ /g, "_")
         : null,
       active: true,
     };

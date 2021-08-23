@@ -15,7 +15,10 @@ const storage = multer.diskStorage({
     cb(null, "./public/images");
   },
   filename: function (req, file, cb) {
-    cb(null, formatDate(Date.now()) + "_" + file.originalname);
+    cb(
+      null,
+      formatDate(Date.now()) + "_" + file.originalname.replace(/ /g, "_")
+    );
   },
 });
 const upload = multer({ storage: storage });
