@@ -43,6 +43,21 @@ router.get("/last-delivers", checkAuth, (req, res, next) => {
     });
 });
 
+router.get("/average-delivers", checkAuth, (req, res, next) => {
+  const professor_id = +(+req.query.professor_id);
+  DeliverAssignment.findAverageDeliverResults({ professor_id })
+    .then((post) => {
+      if (post) {
+        res.status(200).json(post);
+      } else {
+        res.status(404).json({ message: "No Assignment!" });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ message: `Internal Server Error: ${error}` });
+    });
+});
+
 router.get("/:id", checkAuth, (req, res, next) => {
   DeliverAssignment.findById(req.params.id)
     .then((post) => {

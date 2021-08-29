@@ -113,6 +113,34 @@ class DeliverAssignment {
     });
   };
 
+  static findAverageDeliverResults = ({ professor_id }) => {
+    const db = Connection.getInstance();
+
+    if (!professor_id) {
+      return Promise.reject("professor_id is required");
+    }
+
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT EXERCISES.title, DELIVER_ASSIGNMENTS.assignment_id, avg(total_words_detected) avg_words_amount ,words_amount " +
+          "FROM " +
+          "DELIVER_ASSIGNMENTS " +
+          "INNER JOIN ASSIGNMENTS ON DELIVER_ASSIGNMENTS.assignment_id = ASSIGNMENTS.assignment_id " +
+          "INNER JOIN EXERCISES on ASSIGNMENTS.exercise_id  = EXERCISES.exercise_id " +
+          "WHERE EXERCISES.professor_id = ? " +
+          "GROUP BY DELIVER_ASSIGNMENTS.assignment_id " +
+          "ORDER BY ASSIGNMENTS.due_date",
+        [professor_id],
+        function (error, results, fields) {
+          if (error) {
+            reject(error);
+          }
+          resolve(results);
+        }
+      );
+    });
+  };
+
   static findLastDelivers = ({ professor_id, currentPage, pageSize }) => {
     const db = Connection.getInstance();
     let filters = "";
