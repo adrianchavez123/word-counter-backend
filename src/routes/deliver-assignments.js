@@ -26,6 +26,23 @@ router.post("", checkAuth, (req, res, next) => {
     });
 });
 
+router.get("/last-delivers", checkAuth, (req, res, next) => {
+  const pageSize = +req.query.pagesize;
+  const currentPage = +req.query.page;
+  const professor_id = +(+req.query.professor_id);
+  DeliverAssignment.findLastDelivers({ professor_id, currentPage, pageSize })
+    .then((post) => {
+      if (post) {
+        res.status(200).json(post);
+      } else {
+        res.status(404).json({ message: "No Assignment!" });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ message: `Internal Server Error: ${error}` });
+    });
+});
+
 router.get("/:id", checkAuth, (req, res, next) => {
   DeliverAssignment.findById(req.params.id)
     .then((post) => {

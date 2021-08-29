@@ -24,6 +24,7 @@ class Exercise {
         [id],
         function (error, results, fields) {
           if (error) {
+            console.log(error);
             reject(error);
           }
           resolve(results);

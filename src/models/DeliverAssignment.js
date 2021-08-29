@@ -113,6 +113,96 @@ class DeliverAssignment {
     });
   };
 
+  static findLastDelivers = ({ professor_id, currentPage, pageSize }) => {
+    const db = Connection.getInstance();
+    let filters = "";
+    if (!professor_id) {
+      return Promise.reject("professor_id is required");
+    }
+    filters +=
+      " WHERE EXERCISES.professor_id = " +
+      professor_id +
+      " AND ASSIGNMENTS.active = '1' ";
+    filters += "ORDER BY ASSIGNMENTS.due_date DESC ";
+    if (pageSize && currentPage) {
+      filters += " LIMIT " + currentPage * pageSize + " , " + pageSize;
+    }
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT ASSIGNMENTS.assignment_id,EXERCISES.title, ASSIGNMENTS.due_date " +
+          "FROM ASSIGNMENTS " +
+          "JOIN " +
+          "EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id " +
+          filters,
+        [],
+        function (error, results, fields) {
+          if (error) {
+            console.log(error);
+            reject(error);
+          }
+
+          if (results.length > 0) {
+            const data = results.map((assignment) => ({
+              assignment_id: assignment.assignment_id,
+              title: assignment.title,
+              due_date: assignment.due_date,
+            }));
+            resolve(data);
+          } else {
+            reject([]);
+          }
+        }
+      );
+    })
+      .then((data) => {
+        if (!data) {
+          return resolve([]);
+        }
+
+        const assignment_ids = data.map(
+          (assignment) => assignment.assignment_id
+        );
+        if (!assignment_ids || assignment_ids.length <= 0) {
+          return resolve([]);
+        }
+
+        const dynamicParams = data.map((data) => "?");
+        return new Promise((resolve, reject) => {
+          db.query(
+            "SELECT assignment_id, count(deliver_assignment_id) total FROM DELIVER_ASSIGNMENTS where assignment_id in (" +
+              dynamicParams +
+              ") " +
+              " GROUP BY assignment_id ",
+            [...assignment_ids],
+            function (error, results, fields) {
+              if (error) {
+                reject(error);
+              }
+
+              if (results.length > 0) {
+                resolve(
+                  data.map((data) => {
+                    const total = results.find(
+                      (asgmt) => asgmt.assignment_id === data.assignment_id
+                    );
+                    return {
+                      ...data,
+                      total_delivers: total ? total.total : 0,
+                    };
+                  })
+                );
+              } else {
+                resolve(data.map((data) => ({ ...data, total_delivers: 0 })));
+              }
+            }
+          );
+        });
+      })
+      .catch(() => {
+        return [];
+      });
+  };
+
   static deleteOne = (id) => {
     if (!id) {
       return Promise.reject("You need provide an id");
