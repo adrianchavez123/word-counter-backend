@@ -1,7 +1,13 @@
 const Connection = require("./Connection");
 
 class DeliverAssignment {
-  constructor({ assignment_id, student_id, audio_URL, total_words_detected }) {
+  constructor({
+    assignment_id,
+    student_id,
+    audio_URL,
+    total_words_detected,
+    speech_to_text,
+  }) {
     this.assignment_id = assignment_id;
     this.student_id = student_id;
     this.audio_URL = audio_URL;
