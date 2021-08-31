@@ -59,6 +59,7 @@ CREATE TABLE DELIVER_ASSIGNMENTS(
     audio_URL varchar(250) not null,
     total_words_detected int null,
     active boolean not null,
+    speech_to_text text null,
     FOREIGN KEY (assignment_id) REFERENCES ASSIGNMENTS (assignment_id),
     FOREIGN KEY (student_id) REFERENCES STUDENTS (student_id)
 )ENGINE = InnoDB;

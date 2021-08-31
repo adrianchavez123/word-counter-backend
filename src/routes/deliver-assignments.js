@@ -10,6 +10,7 @@ router.post("", checkAuth, (req, res, next) => {
     student_id: req.body.student_id,
     audio_URL: req.body.audio_URL,
     total_words_detected: req.body.total_words_detected,
+    speech_to_text: req.body.speech_to_text,
   });
   assignment
     .save()
@@ -103,6 +104,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
   const assignment = new DeliverAssignment({
     audio_URL: req.body.audio_URL,
     total_words_detected: req.body.total_words_detected,
+    speech_to_text: req.body.speech_to_text,
   });
   assignment
     .update(+req.params.id)

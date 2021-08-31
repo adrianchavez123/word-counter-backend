@@ -120,11 +120,49 @@ class Assignment {
     });
   };
 
+  notifyStudents = (title, description, exercse_image) => {
+    const db = Connection.getInstance();
+    const notifyTemplate = {
+      assignment_title: title,
+      description: description,
+      due_date: this.due_date,
+      image: exercse_image,
+      students: [],
+    };
+
+    const promise = new Promise((resolve, reject) => {
+      db.query(
+        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.username  " +
+          "FROM `GROUPS` " +
+          "LEFT  JOIN STUDENTS ON GROUPS.student_id = STUDENTS.student_id " +
+          "WHERE `group_id` = ?  AND GROUPS.active='1' ",
+        [this.group_id],
+        function (error, results, fields) {
+          if (error) {
+            reject(error);
+          }
+          if (results.length > 0) {
+            notifyTemplate.students = [
+              ...results.map((result) => result.student_id),
+            ];
+            resolve(notifyTemplate);
+          }
+          resolve();
+        }
+      );
+    }).then((notifyTemplate) => {
+      if (!notifyTemplate) {
+        return;
+      }
+      console.log(notifyTemplate);
+    });
+  };
+
   save = () => {
     if (!this.group_id) {
       return Promise.reject("You need provide a group id");
     }
-
+    const notify = this.notifyStudents;
     if (!this.exercise_id) {
       return Promise.reject("You need provide an exercise id");
     }
@@ -150,7 +188,7 @@ class Assignment {
     }).then((data) => {
       return new Promise((resolve, reject) => {
         db.query(
-          "SELECT ASSIGNMENTS.assignment_id, GROUPS.name,EXERCISES.title FROM ASSIGNMENTS " +
+          "SELECT ASSIGNMENTS.assignment_id, GROUPS.name,EXERCISES.title, EXERCISES.description, EXERCISES.exercise_image FROM ASSIGNMENTS " +
             "INNER JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id " +
             "INNER JOIN GROUPS ON ASSIGNMENTS.group_id = GROUPS.group_id " +
             "WHERE ASSIGNMENTS.due_date = ? AND ASSIGNMENTS.exercise_id = ? AND ASSIGNMENTS.group_id = ? AND ASSIGNMENTS.active='1' " +
@@ -167,6 +205,11 @@ class Assignment {
               assignment.exercise_name = results[results.length - 1].title;
               assignment.group_name = results[results.length - 1].name;
               resolve(assignment);
+              notify(
+                assignment.exercise_name,
+                results[results.length - 1].description,
+                results[results.length - 1].exercise_image
+              );
             } else {
               resolve();
             }
@@ -183,6 +226,7 @@ class Assignment {
     if (typeof id !== "number") {
       return Promise.reject("You need provide an id number");
     }
+
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
