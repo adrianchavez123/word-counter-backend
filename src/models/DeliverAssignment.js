@@ -338,7 +338,7 @@ class DeliverAssignment {
     return new Promise((resolve, reject) => {
       const arrive_at = new Date();
       db.query(
-        "UPDATE DELIVER_ASSIGNMENTS SET arrive_at = ?, audio_URL = ?, total_words_detected = ?, speech_to_text WHERE deliver_assignment_id = ?",
+        "UPDATE DELIVER_ASSIGNMENTS SET arrive_at = ?, audio_URL = ?, total_words_detected = ?, speech_to_text = ? WHERE deliver_assignment_id = ?",
         [
           arrive_at,
           this.audio_URL,

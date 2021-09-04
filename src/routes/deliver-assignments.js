@@ -102,6 +102,8 @@ router.delete("/:id", checkAuth, (req, res, next) => {
 
 router.put("/:id", checkAuth, (req, res, next) => {
   const assignment = new DeliverAssignment({
+    assignment_id: req.body.assignment_id,
+    student_id: req.body.student_id,
     audio_URL: req.body.audio_URL,
     total_words_detected: req.body.total_words_detected,
     speech_to_text: req.body.speech_to_text,

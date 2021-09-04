@@ -46,6 +46,72 @@ class Assignment {
     });
   };
 
+  static findLastAssignment = (student_id) => {
+    const db = Connection.getInstance();
+    if (!student_id) {
+      return Promise.reject("student_id is required");
+    }
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT professor_id FROM GROUPS WHERE" + " student_id = ? LIMIT 1",
+        [student_id],
+        function (error, results, fields) {
+          if (error) {
+            reject(error);
+          }
+          if (results.length > 0) {
+            resolve(results[0]);
+          } else {
+            return reject("student_id is not member of any group");
+          }
+        }
+      );
+    })
+      .then((professor) => {
+        return new Promise((resolve, reject) => {
+          db.query(
+            "SELECT ASSIGNMENTS.assignment_id, due_date, ASSIGNMENTS.active FROM " +
+              "ASSIGNMENTS " +
+              "INNER JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id  " +
+              "WHERE ASSIGNMENTS.active = 1 order by due_date desc LIMIT 1",
+            [professor.professor_id],
+            function (error, results, fields) {
+              if (error) {
+                reject(error);
+              }
+              if (results.length > 0) {
+                resolve(results[0]);
+              } else {
+                return reject("student_id is not member of any group");
+              }
+            }
+          );
+        });
+      })
+      .then((assignment) => {
+        return new Promise((resolve, reject) => {
+          db.query(
+            "SELECT deliver_assignment_id,student_id,assignment_id FROM DELIVER_ASSIGNMENTS WHERE assignment_id = ?",
+            [assignment.assignment_id],
+            function (error, results, fields) {
+              if (error) {
+                console.log(error);
+                reject(error);
+              }
+              if (results.length === 1) {
+                resolve({
+                  ...assignment,
+                  deliver_assignment_id: results[0].deliver_assignment_id,
+                });
+              } else {
+                resolve({ ...assignment, deliver_assignment_id: null });
+              }
+            }
+          );
+        });
+      });
+  };
+
   static find = ({ professor_id, currentPage, pageSize }) => {
     const db = Connection.getInstance();
     let filters = "";
