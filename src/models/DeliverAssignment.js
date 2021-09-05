@@ -68,10 +68,7 @@ class DeliverAssignment {
     if (!professor_id) {
       return Promise.reject("professor_id is required");
     }
-    filters +=
-      " WHERE EXERCISES.professor_id = " +
-      professor_id +
-      " AND DELIVER_ASSIGNMENTS.active = '1' ";
+    filters += ` WHERE EXERCISES.professor_id = '${professor_id}'  AND DELIVER_ASSIGNMENTS.active = '1' `;
     filters += " GROUP BY DELIVER_ASSIGNMENTS.deliver_assignment_id";
     if (pageSize && currentPage) {
       filters += " LIMIT " + currentPage * pageSize + " , " + pageSize;
@@ -156,11 +153,8 @@ class DeliverAssignment {
     if (!professor_id) {
       return Promise.reject("professor_id is required");
     }
-    filters +=
-      " WHERE EXERCISES.professor_id = " +
-      professor_id +
-      " AND ASSIGNMENTS.active = '1' ";
-    filters += "ORDER BY ASSIGNMENTS.due_date DESC ";
+    filters += ` WHERE EXERCISES.professor_id = '${professor_id}'  AND ASSIGNMENTS.active = '1' `;
+    filters += " ORDER BY ASSIGNMENTS.due_date DESC ";
     if (pageSize && currentPage) {
       filters += " LIMIT " + currentPage * pageSize + " , " + pageSize;
     }

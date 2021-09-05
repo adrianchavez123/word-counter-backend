@@ -39,11 +39,10 @@ class Group {
 
   static find = ({ professor_id }) => {
     const db = Connection.getInstance();
-    let filters = "";
+
     if (!professor_id) {
       return Promise.reject("professor_id is required");
     }
-    filters += " WHERE GROUPS.professor_id = " + professor_id;
 
     return new Promise((resolve, reject) => {
       db.query(
@@ -148,6 +147,7 @@ class Group {
           [rowsArray],
           function (error, results, fields) {
             if (error) {
+              console.log(error);
               reject(error);
             }
             resolve({

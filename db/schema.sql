@@ -3,8 +3,8 @@ USE WORD_COUNTER;
 
 CREATE TABLE PROFESSORS(
     professor_id varchar(100) not null PRIMARY KEY,
-    username varchar(50) not null,
-    name varchar(50) not null,
+    username varchar(50)  null,
+    name varchar(50)  null,
     email varchar(50)  unique not null,
     active boolean not null
 )ENGINE = InnoDB;

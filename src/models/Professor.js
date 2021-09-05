@@ -123,9 +123,9 @@ class Professor {
   };
 
   save = () => {
-    if (!this.name) {
-      return Promise.reject("You need provide a name");
-    }
+    // if (!this.name) {
+    //   return Promise.reject("You need provide a name");
+    // }
     if (!this.email) {
       return Promise.reject("You need provide an email");
     }

@@ -56,7 +56,7 @@ router.get("/:id", checkAuth, (req, res, next) => {
 router.get("", checkAuth, (req, res, next) => {
   const pageSize = +req.query.pagesize;
   const currentPage = +req.query.page;
-  const professor_id = +(+req.query.professor_id);
+  const professor_id = req.query.professor_id;
   Assignment.find({ professor_id, currentPage, pageSize })
     .then((post) => {
       if (post) {

@@ -95,7 +95,6 @@ class Assignment {
             [assignment.assignment_id],
             function (error, results, fields) {
               if (error) {
-                console.log(error);
                 reject(error);
               }
               if (results.length === 1) {
@@ -118,10 +117,7 @@ class Assignment {
     if (!professor_id) {
       return Promise.reject("professor_id is required");
     }
-    filters +=
-      " WHERE EXERCISES.professor_id = " +
-      professor_id +
-      " AND ASSIGNMENTS.active = '1' ";
+    filters += ` WHERE EXERCISES.professor_id = '${professor_id}' AND ASSIGNMENTS.active = '1' `;
     if (pageSize && currentPage) {
       filters += " LIMIT " + currentPage * pageSize + " , " + pageSize;
     }

@@ -30,7 +30,7 @@ router.post("", checkAuth, (req, res, next) => {
 router.get("/last-delivers", checkAuth, (req, res, next) => {
   const pageSize = +req.query.pagesize;
   const currentPage = +req.query.page;
-  const professor_id = +(+req.query.professor_id);
+  const professor_id = req.query.professor_id;
   DeliverAssignment.findLastDelivers({ professor_id, currentPage, pageSize })
     .then((post) => {
       if (post) {
@@ -45,7 +45,7 @@ router.get("/last-delivers", checkAuth, (req, res, next) => {
 });
 
 router.get("/average-delivers", checkAuth, (req, res, next) => {
-  const professor_id = +(+req.query.professor_id);
+  const professor_id = req.query.professor_id;
   DeliverAssignment.findAverageDeliverResults({ professor_id })
     .then((post) => {
       if (post) {
@@ -76,7 +76,7 @@ router.get("/:id", checkAuth, (req, res, next) => {
 router.get("", checkAuth, (req, res, next) => {
   const pageSize = +req.query.pagesize;
   const currentPage = +req.query.page;
-  const professor_id = +(+req.query.professor_id);
+  const professor_id = req.query.professor_id;
   DeliverAssignment.find({ professor_id, currentPage, pageSize })
     .then((post) => {
       if (post) {

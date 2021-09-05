@@ -79,7 +79,7 @@ class Professor {
     if (!professor_id) {
       return Promise.reject("professor_id is required");
     }
-    filters += " WHERE EXERCISES.professor_id = " + professor_id;
+    filters += ` WHERE EXERCISES.professor_id = '${professor_id}'`;
 
     return new Promise((resolve, reject) => {
       db.query(

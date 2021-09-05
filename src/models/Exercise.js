@@ -39,7 +39,7 @@ class Exercise {
     if (!professor_id) {
       return Promise.reject("professor_id is required");
     }
-    filters += " WHERE professor_id = " + professor_id + " AND active='1' ";
+    filters += ` WHERE professor_id = '${professor_id}' AND active='1' `;
     if (pageSize && currentPage) {
       filters += " LIMIT " + currentPage * pageSize + " , " + pageSize;
     }

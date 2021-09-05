@@ -39,7 +39,7 @@ router.get("/:id", checkAuth, (req, res, next) => {
 });
 
 router.get("", checkAuth, (req, res, next) => {
-  const professor_id = +(+req.query.professor_id);
+  const professor_id = req.query.professor_id;
   Student.find({ professor_id })
     .then((student) => {
       if (student) {
