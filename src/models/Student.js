@@ -15,7 +15,7 @@ class Professor {
           "FROM STUDENTS LEFT JOIN GROUPS ON STUDENTS.student_id = GROUPS.student_id " +
           "LEFT JOIN ASSIGNMENTS ON GROUPS.group_id = ASSIGNMENTS.group_id " +
           "LEFT JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id " +
-          "WHERE STUDENTS.student_id = ?",
+          "WHERE STUDENTS.student_id = ? AND STUDENTS.active = 1",
         [id],
         function (error, results, fields) {
           if (error) {

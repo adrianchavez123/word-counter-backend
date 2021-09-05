@@ -1,11 +1,11 @@
 const Connection = require("./Connection");
 
 class Professor {
-  constructor({ username, name, email, password }) {
+  constructor({ professor_id, username, name, email }) {
+    this.professor_id = professor_id;
     this.username = username;
     this.name = name;
     this.email = email;
-    this.password = password;
   }
 
   static findById = (id) => {
@@ -17,7 +17,7 @@ class Professor {
           "FROM PROFESSORS " +
           "LEFT JOIN GROUPS ON PROFESSORS.professor_id = GROUPS.professor_id " +
           "LEFT JOIN EXERCISES ON PROFESSORS.professor_id = EXERCISES.professor_id " +
-          "WHERE PROFESSORS.professor_id = ?",
+          "WHERE PROFESSORS.professor_id = ? AND PROFESSORS.active = 1",
         [id],
         function (error, results, fields) {
           if (error) {
@@ -76,9 +76,7 @@ class Professor {
     if (!id) {
       return Promise.reject("You need provide an id");
     }
-    if (typeof id !== "number") {
-      return Promise.reject("You need provide an id number");
-    }
+
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
@@ -132,10 +130,10 @@ class Professor {
       return Promise.reject("You need provide an email");
     }
     const professor = {
+      professor_id: this.professor_id,
       username: this.username,
       name: this.name,
       email: this.email,
-      password: this.password,
       active: true,
     };
 
@@ -148,7 +146,6 @@ class Professor {
           if (error) {
             reject(error);
           }
-          delete professor.password;
           delete professor.active;
           resolve(professor);
         }
@@ -160,14 +157,7 @@ class Professor {
     if (!id) {
       return Promise.reject("You need provide an id");
     }
-    if (typeof id !== "number") {
-      return Promise.reject("You need provide an id number");
-    }
-    const professor = {
-      username: this.username,
-      name: this.name,
-      email: this.email,
-    };
+
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(

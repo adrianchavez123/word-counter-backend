@@ -2,11 +2,10 @@ CREATE DATABASE WORD_COUNTER;
 USE WORD_COUNTER;
 
 CREATE TABLE PROFESSORS(
-    professor_id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    professor_id varchar(100) not null PRIMARY KEY,
     username varchar(50) not null,
     name varchar(50) not null,
     email varchar(50)  unique not null,
-    password varchar(50) not null,
     active boolean not null
 )ENGINE = InnoDB;
 
@@ -19,7 +18,7 @@ CREATE TABLE STUDENTS(
 
 CREATE TABLE GROUPS(
     group_id int NOT NULL,
-    professor_id int not null,
+    professor_id varchar(100) not null,
     student_id int null,
     name varchar(50) not null,
     active boolean not null,
@@ -33,7 +32,7 @@ CREATE TABLE EXERCISES(
     title varchar(250) not null,
     description text null,
     words_amount int null,
-    professor_id int not null,
+    professor_id varchar(100) not null,
     exercise_image varchar(250),
     active boolean not null,
     FOREIGN KEY (professor_id) REFERENCES PROFESSORS (professor_id)

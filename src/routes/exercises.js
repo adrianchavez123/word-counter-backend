@@ -68,6 +68,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
     description: req.body.description,
     words_amount: req.body.words_amount,
     professor_id: req.body.professor_id,
+    // TODO: include image
   });
   exercise
     .update(+req.params.id)

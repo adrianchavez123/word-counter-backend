@@ -6,10 +6,10 @@ const router = express.Router();
 
 router.post("", checkAuth, (req, res, next) => {
   const professor = new Professor({
+    professor_id: req.body.professor_id,
     username: req.body.username,
     name: req.body.name,
     email: req.body.email,
-    password: req.body.password,
   });
   professor
     .save()
