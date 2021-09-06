@@ -1,3 +1,6 @@
+const path = require("path");
+const fs = require("fs");
+const uuid = require("uuid-random");
 const Connection = require("./Connection");
 
 class Assignment {
@@ -133,6 +136,42 @@ class Assignment {
     });
   };
 
+  static getPendingNotifications = () => {
+    return new Promise((resolve, reject) => {
+      const notifications = { notifications: [] };
+      const jsonsInDir = fs
+        .readdirSync(path.join(__dirname, "../../public/notifications"))
+        .filter((file) => path.extname(file) === ".json");
+
+      jsonsInDir.forEach((file) => {
+        const fileData = fs.readFileSync(
+          path.join(__dirname, "../../public/notifications", file)
+        );
+        const json = JSON.parse(fileData.toString());
+        notifications.notifications.push({ fileName: file, ...json });
+      });
+      return resolve(notifications);
+    });
+  };
+
+  static deleteNotificationTemplate = (fileName) => {
+    return new Promise((resolve, reject) => {
+      fs.unlink(
+        path.join(__dirname, "../../public/notifications", fileName),
+        (err) => {
+          if (err) {
+            reject(`The notification template was not deleted`);
+            return console.log(err);
+          }
+          console.log("file deleted successfully");
+          return resolve({
+            message: `notification template (${fileName}) deleted successfully.`,
+          });
+        }
+      );
+    });
+  };
+
   static find = ({ professor_id, currentPage, pageSize }) => {
     const db = Connection.getInstance();
     let filters = "";
@@ -238,7 +277,11 @@ class Assignment {
       if (!notifyTemplate) {
         return;
       }
-      console.log(notifyTemplate);
+      let data = JSON.stringify(notifyTemplate);
+      fs.writeFileSync(
+        path.join(__dirname, "../../public/notifications", `${uuid()}.json`),
+        data
+      );
     });
   };
 
