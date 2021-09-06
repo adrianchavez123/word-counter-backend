@@ -111,6 +111,28 @@ class Assignment {
       });
   };
 
+  static closePassDueDate = () => {
+    const db = Connection.getInstance();
+    const today = new Date();
+    return new Promise((resolve, reject) => {
+      db.query(
+        "UPDATE ASSIGNMENTS set active = 0 WHERE due_date < ? ",
+        [today],
+        function (error, results, fields) {
+          if (error) {
+            reject(error);
+          }
+
+          if (results.changedRows > 0) {
+            return resolve(`${results.changedRows} assignments were closed.`);
+          } else {
+            return resolve("No assignments where closed.");
+          }
+        }
+      );
+    });
+  };
+
   static find = ({ professor_id, currentPage, pageSize }) => {
     const db = Connection.getInstance();
     let filters = "";

@@ -39,6 +39,20 @@ router.get("/last-assignment/:student_id", checkAuth, (req, res, next) => {
     });
 });
 
+router.get("/close-pass-due-date", checkAuth, (req, res, next) => {
+  Assignment.closePassDueDate()
+    .then((post) => {
+      if (post) {
+        res.status(200).json(post);
+      } else {
+        res.status(404).json({ message: "Assignment not found!" });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ message: error });
+    });
+});
+
 router.get("/:id", checkAuth, (req, res, next) => {
   Assignment.findById(req.params.id)
     .then((post) => {
