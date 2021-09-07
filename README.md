@@ -46,8 +46,7 @@ Request:
 {
     "username": "String",
     "name": "String",
-    "email": "String",
-    "password": "String"
+    "email": "String"
   }
 ```
 
@@ -73,7 +72,7 @@ GET
 Response:
 ```json
 {
-  "professor_id": 2,
+  "professor_id": "String",
   "name": "String",
   "username": "String",
   "groups": [],
@@ -456,14 +455,14 @@ Response:
     "title": "leer el cuento más contado",
     "description": "descripcion",
     "words_amount": 150,
-    "professor_id": 1
+    "professor_id": "fdsfdsf7d8979hnkfdsd798787"
   },
   {
     "exercise_id": 2,
     "title": "leer ejercicio pagina 189",
     "description": "descripcion",
     "words_amount": 161,
-    "professor_id": 1
+    "professor_id": "fdsfdsf7d8979hnkfdsd798787"
   },
 ]
 ```
@@ -483,7 +482,7 @@ Response:
     "title": "leer el cuento más contado",
     "description": "descripcion",
     "words_amount": 150,
-    "professor_id": 1
+    "professor_id": "fdsfdsf7d8979hnkfdsd798787"
   }
 ]
 ```
@@ -501,7 +500,8 @@ Request:
     "title": "String",
     "description": "String",
     "words_amount": "int",
-    "professor_id": "int"
+    "professor_id": "String",
+    "exercise_image": "String"
 }
 ```
 
@@ -513,8 +513,9 @@ Response:
     "title": "String",
     "description": "String",
     "words_amount": 2,
-    "professor_id": 1,
-    "exercise_id": 16
+    "professor_id": "String",
+    "exercise_id": 16,
+    "exercise_image": "String"
   }
 }
 ```
@@ -568,6 +569,10 @@ Response:
 | api/assignments/     | POST      |    |
 | api/assignments/`<id>`| PUT    |     |
 | api/assignments/`<id>`| DELETE    |     |
+| api/assignments/last-assignment/`<student_id>`| GET    |     |
+| api/assignments/close-pass-due-date/| GET    |     |
+| api/assignments/pending-notifications/| GET    |     |
+| api/assignments/delete-notification/'<fileName>`| GET    |     |
 
 **view assignments**
 Endpoint:
@@ -697,6 +702,83 @@ Response:
 }
 ```
 
+**last assignment**
+This endpoint is used on students delivers, at student's deliver they need the id of the latest assignment and call retrives the information.
+Endpoint:
+api/assignments/last-assignment/<student_id>
+
+Verb:
+GET
+
+Response:
+```json
+{
+  "assignment_id": 1,
+  "due_date": "2021-10-08T05:00:00.000Z",
+  "active": 1,
+  "deliver_assignment_id": 1
+}
+```
+
+**close assignment**
+This endpoint is used internally, every assignments contains a _due date_ so they endpoint closes any assigments that are pass due date.
+Endpoint:
+api/assignments/close-pass-due-date
+
+Verb:
+GET
+
+Response:
+```json
+{
+  "message": "2 assignments were closed."
+}
+```
+
+**pending assignment notifications**
+**internal use**, this endpoint retrieves all the new assignments created and a retrieves a notification template to send the telegram alerts by bot process (_bot.py_) 
+Endpoint:
+api/assignments/pending-notifications
+
+Verb:
+GET
+
+Response:
+```json
+{
+  "notifications": [
+    {
+      "fileName": "1b0af860-05c9-4a4b-972e-f6ddf209ebfe.json",
+      "assignment_title": "el cuento más contado",
+      "description": "leer la página 189 del libro de lectura",
+      "due_date": "2021-09-17",
+      "image": "http://localhost:5000/images/2021_09_06_WhatsApp_Image_2021-05-30_at_11.00.56_PM.jpeg",
+      "students": [
+        694384,
+        78904543,
+        908143222,
+        333996532,
+        79522343
+      ]
+    }
+  ]
+}
+```
+
+**Delete notification**
+**internal use**, this endpoint notifies the server a notification was sent so the backend can remove the notification template
+Endpoint:
+api/assignments//delete-notification/`<fileName>`
+
+Verb:
+GET
+
+Response:
+```json
+{
+  "message": "notification template (1b0af860-05c9-4a4b-972e-f6ddf209ebfe.json) deleted successfully."
+}
+```
 
 ### `Deliver Assignment`
 
@@ -707,6 +789,8 @@ Response:
 | api/deliver-assignments/     | POST      |    |
 | api/deliver-assignments/`<id>`| PUT    |     |
 | api/deliver-assignments/`<id>`| DELETE    |     |
+| api/deliver-assignments/last-delivers| GET    | professor_id=`<id>`    |
+| api/deliver-assignments/average-delivers| GET    | professor_id=`<id>`    |
 
 **view deliver assignments**
 Endpoint:
@@ -728,6 +812,7 @@ Response:
     "arrive_at": "2021-08-02T05:00:00.000Z",
     "audio_URL": "",
     "total_words_detected": 100,
+    "speech_to_text": "",
     "assignment": {
       "assignment_id": 1,
       "due_date": "2021-08-03T05:00:00.000Z"
@@ -759,6 +844,7 @@ Response:
     "arrive_at": "2021-08-02T05:00:00.000Z",
     "audio_URL": "",
     "total_words_detected": 98,
+    "speech_to_text": "",
     "assignment": {
       "assignment_id": 2,
       "due_date": "2021-08-04T05:00:00.000Z"
@@ -819,7 +905,8 @@ Request:
 ```json
 {
     "audio_URL": "String",
-    "total_words_detected": "int"
+    "total_words_detected": "int",
+    "speech_to_text": "String"
 }
 ```
 
@@ -843,4 +930,43 @@ Response:
 {
   "message": "Deliver Assignment deleted!"
 }
+```
+
+**Get the latest deliver assignments order by professor**
+Endpoint:
+api/deliver-assignments/last-delivers
+
+Verb:
+GET
+
+Response:
+```json
+[
+  {
+    "assignment_id": 1,
+    "title": "el cuento mas contado (nuevo titulo)",
+    "due_date": "2021-10-08T05:00:00.000Z",
+    "total_delivers": 1
+  }
+]
+```
+
+**Average deliver word counter detection**
+This endpoint can be use like a summary to the professors to get an idea how is the performance of the group.
+Endpoint:
+api/deliver-assignments/average-delivers
+
+Verb:
+GET
+
+Response:
+```json
+[
+  {
+    "title": "el cuento mas contado (nuevo titulo)",
+    "assignment_id": 1,
+    "avg_words_amount": 80,
+    "words_amount": 180
+  }
+]
 ```
