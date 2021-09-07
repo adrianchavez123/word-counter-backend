@@ -72,7 +72,7 @@ GET
 Response:
 ```json
 {
-  "professor_id": String,
+  "professor_id": "String",
   "name": "String",
   "username": "String",
   "groups": [],
