@@ -43,7 +43,7 @@ router.get("/close-pass-due-date", checkAuth, (req, res, next) => {
   Assignment.closePassDueDate()
     .then((post) => {
       if (post) {
-        res.status(200).json(post);
+        res.status(200).json({ message: post });
       } else {
         res.status(404).json({ message: "Assignment not found!" });
       }

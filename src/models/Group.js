@@ -147,7 +147,6 @@ class Group {
           [rowsArray],
           function (error, results, fields) {
             if (error) {
-              console.log(error);
               reject(error);
             }
             resolve({
