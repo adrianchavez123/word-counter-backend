@@ -23,6 +23,58 @@ Internally, the script `server.js` is started by `nodemon`so the server will be 
 Please visit [schema.sql](https://github.com/adrianchavez123/word-counter-backend/blob/main/db/schema.sql) to get more details about the database and its tables.
 MariaDB is the RDBM used so far but it may be updated to support different RDBMs.
 
+
+## Installation
+The backend rest api needs MariaDB/Mysql database, so the installation of MariaDB is a requirement,below you will find the instructions to install it on a Linux distribution that supports `yum` as dependencies management.
+#### Install MariaDB
+1. Update the repository list
+```sudo yum update -y
+```
+2. Get the latest version of MariaDB
+```sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+```
+3. Install MariaDB server (daemon)
+```
+sudo yum install -y httpd mariadb-server
+```
+4.  Start the service
+```
+sudo systemctl start httpd
+```
+5. Enable start the service automatically when the SO is booting
+```
+sudo systemctl enable httpd
+```
+6. Verify the service start at booting time 
+``` 
+sudo systemctl is-enabled httpd
+``` 
+
+__Note__, you can find a deeper description [here](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-lamp-amazon-linux-2.html), the link describes how to install LAMP web server on Amazon Linux 2, however not all the packages are needed for this project.
+
+#### Install Node js
+The backend rest api service is a NodeJs project and its main dependency is `express` framework that is used to create rest api applications and web applications, you can find the instructions to install NodeJs at [Tutorial: Setting Up Node.js on an Amazon EC2 Instance](https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-up-node-on-ec2-instance.html), the instructions are installing `nvm` that is a node version manager which allows change node versions easilly, to run this application you can choose the latest version.
+1. Download and install nvm package
+```
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.34.0/install.sh | bash
+```
+2. Activate nvm package
+```
+. ~/.nvm/nvm.sh
+````
+
+3. Install a node version
+```
+nvm install node
+```
+4. Verify the node version installed
+```
+node -e "console.log('Running Node.js ' + process.version)"
+``` 
+__Note__, its very likely that the nvm version is attached to current user that you are using during the installation meaing that if you change users, your nvm or node command won't be recognize and probably you'll need to update the path variable.
+
+### Installing MariaDB
+
 ## Available Routes and their responses
 
 ### `Profesor`
