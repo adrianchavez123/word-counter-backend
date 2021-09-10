@@ -28,10 +28,12 @@ MariaDB is the RDBM used so far but it may be updated to support different RDBMs
 The backend rest api needs MariaDB/Mysql database, so the installation of MariaDB is a requirement,below you will find the instructions to install it on a Linux distribution that supports `yum` as dependencies management.
 #### Install MariaDB
 1. Update the repository list
-```sudo yum update -y
+```
+sudo yum update -y
 ```
 2. Get the latest version of MariaDB
-```sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+```
+sudo amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
 ```
 3. Install MariaDB server (daemon)
 ```
