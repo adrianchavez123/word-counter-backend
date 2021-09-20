@@ -40,6 +40,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(express.static(path.join(__dirname, "../build")));
+
+app.get("/", function (req, res) {
+  res.sendFile(path.join(__dirname, "../build", "index.html"));
+});
+
 app.post("/image", upload.single("image"), function (req, res, next) {
   return res.json({ message: "single file uploaded" });
 });
