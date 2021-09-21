@@ -9,6 +9,7 @@ router.post("", checkAuth, (req, res, next) => {
     professor_id: req.body.professor_id,
     name: req.body.name,
     students: req.body.students,
+    token: req.body.token,
   });
   group
     .save()
@@ -69,6 +70,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
   const group = new Group({
     professor_id: req.body.professor_id,
     name: req.body.name,
+    token: req.body.token,
   });
   group
     .update(+req.params.id)
