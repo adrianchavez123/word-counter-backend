@@ -5,7 +5,7 @@ class Group {
     this.professor_id = professor_id;
     this.name = name;
     this.students = students || [null];
-    this.token = token || "";
+    this.token = token || 0;
   }
 
   static findById = (id) => {
