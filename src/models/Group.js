@@ -39,18 +39,18 @@ class Group {
           message: `registered to group: ${groupData.name}`,
         });
       }
-
+      const registerStudent = [
+        groupData.group_id,
+        groupData.professor_id,
+        student_id,
+        groupData.name,
+        true,
+        token,
+      ];
       return new Promise((resolve, reject) => {
         db.query(
           "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active,token) VALUES (?)",
-          [
-            groupData.group_id,
-            groupData.professor_id,
-            student_id,
-            groupData.name,
-            true,
-            token,
-          ],
+          [registerStudent],
           function (error, results, fields) {
             if (error) {
               console.log(error);
