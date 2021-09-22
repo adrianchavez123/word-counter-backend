@@ -76,7 +76,7 @@ class Assignment {
             "SELECT ASSIGNMENTS.assignment_id, due_date, ASSIGNMENTS.active FROM " +
               "ASSIGNMENTS " +
               "INNER JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id  " +
-              "WHERE ASSIGNMENTS.active = 1 order by due_date desc LIMIT 1",
+              "WHERE ASSIGNMENTS.active = 1 order by due_date asc LIMIT 1",
             [professor.professor_id],
             function (error, results, fields) {
               if (error) {
@@ -100,10 +100,11 @@ class Assignment {
               if (error) {
                 reject(error);
               }
-              if (results.length === 1) {
+              if (results.length > 0) {
                 resolve({
                   ...assignment,
-                  deliver_assignment_id: results[0].deliver_assignment_id,
+                  deliver_assignment_id:
+                    results[results.length - 1].deliver_assignment_id,
                 });
               } else {
                 resolve({ ...assignment, deliver_assignment_id: null });
