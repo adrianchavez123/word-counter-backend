@@ -11,6 +11,7 @@ router.post("", checkAuth, (req, res, next) => {
     audio_URL: req.body.audio_URL,
     total_words_detected: req.body.total_words_detected,
     speech_to_text: req.body.speech_to_text,
+    arrive_at: req.body.arrive_at,
   });
   assignment
     .save()
@@ -107,6 +108,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
     audio_URL: req.body.audio_URL,
     total_words_detected: req.body.total_words_detected,
     speech_to_text: req.body.speech_to_text,
+    arrive_at: req.body.arrive_at,
   });
   assignment
     .update(+req.params.id)

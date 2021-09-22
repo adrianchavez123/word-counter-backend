@@ -7,12 +7,14 @@ class DeliverAssignment {
     audio_URL,
     total_words_detected,
     speech_to_text,
+    arrive_at,
   }) {
     this.assignment_id = assignment_id;
     this.student_id = student_id;
     this.audio_URL = audio_URL;
     this.total_words_detected = total_words_detected;
     this.speech_to_text = speech_to_text;
+    this.arrive_at = arrive_at;
   }
 
   static findById = (id) => {
@@ -268,7 +270,7 @@ class DeliverAssignment {
     const deliverAssignment = {
       assignment_id: this.assignment_id,
       student_id: this.student_id,
-      arrive_at: new Date(),
+      arrive_at: this.arrive_at,
       audio_URL: this.audio_URL,
       total_words_detected: this.total_words_detected,
       speech_to_text: this.speech_to_text,
@@ -330,11 +332,10 @@ class DeliverAssignment {
     }
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
-      const arrive_at = new Date();
       db.query(
         "UPDATE DELIVER_ASSIGNMENTS SET arrive_at = ?, audio_URL = ?, total_words_detected = ?, speech_to_text = ? WHERE deliver_assignment_id = ?",
         [
-          arrive_at,
+          this.arrive_at,
           this.audio_URL,
           this.total_words_detected,
           this.speech_to_text,
