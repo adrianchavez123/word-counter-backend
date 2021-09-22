@@ -7,6 +7,63 @@ class Group {
     this.students = students || [null];
     this.token = token || 0;
   }
+  static join = (student_id, token) => {
+    const db = Connection.getInstance();
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, GROUPS.token, Groups.professor_id  " +
+          "FROM `GROUPS` " +
+          "WHERE `token` = ?  AND GROUPS.active='1' ",
+        [token],
+        function (error, results, fields) {
+          if (error) {
+            reject(error);
+          }
+          if (results.length > 0) {
+            return resolve(results);
+          }
+          resolve();
+        }
+      );
+    }).then((group) => {
+      if (!group) {
+        return resolve();
+      }
+      const [groupData] = group;
+      const registeredStudent = group
+        .map((g) => g.student_id)
+        .find((id) => +id === +student_id);
+
+      if (registeredStudent) {
+        return Promise.resolve({
+          message: `registered to group: ${groupData.name}`,
+        });
+      }
+
+      return new Promise((resolve, reject) => {
+        db.query(
+          "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active,token) VALUES (?)",
+          [
+            groupData.group_id,
+            groupData.professor_id,
+            student_id,
+            groupData.name,
+            true,
+            token,
+          ],
+          function (error, results, fields) {
+            if (error) {
+              console.log(error);
+              return reject(error);
+            }
+            resolve({
+              message: `registered to group: ${groupData.name}`,
+            });
+          }
+        );
+      });
+    });
+  };
 
   static findById = (id) => {
     const db = Connection.getInstance();

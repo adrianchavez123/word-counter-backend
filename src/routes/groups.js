@@ -26,6 +26,22 @@ router.post("", checkAuth, (req, res, next) => {
     });
 });
 
+router.get("/join/:student_id/:token", checkAuth, (req, res, next) => {
+  const student_id = req.params.student_id;
+  const token = req.params.token;
+  Group.join(student_id, token)
+    .then((group) => {
+      if (group) {
+        res.status(200).json(group);
+      } else {
+        res.status(404).json({ message: "Group not found!" });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "Internal Server Error" });
+    });
+});
+
 router.get("/:id", checkAuth, (req, res, next) => {
   Group.findById(req.params.id)
     .then((group) => {
