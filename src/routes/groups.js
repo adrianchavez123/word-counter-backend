@@ -82,11 +82,12 @@ router.delete("/:id", checkAuth, (req, res, next) => {
 });
 
 router.put("/:id", checkAuth, (req, res, next) => {
-  // TODO: how to add an remove students
+  // TODO: disabled add, not easy way of knowing telegram ids
   const group = new Group({
     professor_id: req.body.professor_id,
     name: req.body.name,
     token: req.body.token,
+    students: req.body.students,
   });
   group
     .update(+req.params.id)

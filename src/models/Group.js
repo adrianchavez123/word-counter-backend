@@ -230,6 +230,7 @@ class Group {
       return Promise.reject("You need provide an id number");
     }
     const db = Connection.getInstance();
+    const membersList = [...this.students];
     return new Promise((resolve, reject) => {
       db.query(
         "UPDATE GROUPS SET name = ? , token = ? WHERE group_id = ?",
@@ -241,7 +242,52 @@ class Group {
           resolve({ updated: true });
         }
       );
-    });
+    })
+      .then((data) => {
+        if (!data.updated) {
+          return resolve({ updated: true });
+        }
+        return new Promise((resolve, reject) => {
+          db.query(
+            "SELECT * FROM GROUPS where group_id = ?",
+            [id],
+            function (error, results, fields) {
+              if (error) {
+                reject(error);
+              }
+              const inactiveMembers = [];
+              results.forEach((g) => {
+                if (
+                  !membersList.includes(g.student_id) &&
+                  g.student_id !== null
+                ) {
+                  inactiveMembers.push(g.student_id);
+                }
+              });
+              resolve(inactiveMembers);
+            }
+          );
+        });
+      })
+      .then((inactiveMembers) => {
+        return new Promise((resolve, reject) => {
+          const ids = [...new Set(inactiveMembers)].join(",");
+          if (ids.length == 0) {
+            return resolve({ updated: true });
+          }
+          db.query(
+            `UPDATE GROUPS SET active = ? WHERE group_id = ? AND student_id IN (${ids})`,
+            [false, id],
+            function (error, results, fields) {
+              console.log(error);
+              if (error) {
+                return reject(error);
+              }
+              resolve({ updated: true });
+            }
+          );
+        });
+      });
   };
 }
 

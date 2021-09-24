@@ -267,7 +267,9 @@ class Assignment {
           }
           if (results.length > 0) {
             notifyTemplate.students = [
-              ...results.map((result) => result.student_id),
+              ...results
+                .map((result) => result.student_id)
+                .filter((st) => st !== null),
             ];
             resolve(notifyTemplate);
           }
