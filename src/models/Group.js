@@ -11,18 +11,18 @@ class Group {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, GROUPS.token, Groups.professor_id  " +
+        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, GROUPS.token, GROUPS.professor_id  " +
           "FROM `GROUPS` " +
           "WHERE `token` = ?  AND GROUPS.active='1' ",
         [token],
         function (error, results, fields) {
           if (error) {
-            reject(error);
+            return reject(error);
           }
-          if (results.length > 0) {
+          if (results?.length > 0) {
             return resolve(results);
           }
-          resolve();
+          return resolve();
         }
       );
     }).then((group) => {
@@ -112,9 +112,9 @@ class Group {
         [professor_id],
         function (error, results, fields) {
           if (error) {
-            reject(error);
+            return reject(error);
           }
-          if (results.length > 0) {
+          if (results?.length > 0) {
             const groupIds = results.map((row) => row.group_id);
             const ids = [...new Set(groupIds)];
             const data = {

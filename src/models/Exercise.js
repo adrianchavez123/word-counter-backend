@@ -1,6 +1,7 @@
+const publicIp = require("public-ip");
 const Connection = require("./Connection");
 const formatDate = require("../utils/data-utils");
-const { staticImageURL } = require("../../config");
+const { staticImageURL, port } = require("../../config");
 class Exercise {
   constructor({
     title,
@@ -95,38 +96,53 @@ class Exercise {
         : null,
       active: true,
     };
-
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
-      db.query(
-        "INSERT INTO EXERCISES SET ?",
-        excercise,
-        function (error, results, fields) {
-          if (error) {
-            reject(error);
-          }
-          resolve(excercise);
-        }
-      );
-    }).then((data) => {
+      if (this.exercise_image) {
+        return resolve(publicIp.v4());
+      }
+      resolve();
+    }).then((ip) => {
+      console.log("ip", ip);
+      if (ip) {
+        excercise.exercise_image = `http://${ip}:${port}${excercise.exercise_image}`;
+      }
       return new Promise((resolve, reject) => {
         db.query(
-          "SELECT exercise_id FROM EXERCISES WHERE title = ? AND description = ? AND words_amount = ? AND professor_id = ? AND active='1' ",
-          [this.title, this.description, this.words_amount, this.professor_id],
+          "INSERT INTO EXERCISES SET ?",
+          excercise,
           function (error, results, fields) {
             if (error) {
               reject(error);
             }
-
-            if (results.length > 0) {
-              delete excercise.active;
-              excercise.exercise_id = results[results.length - 1].exercise_id;
-              resolve(excercise);
-            } else {
-              resolve();
-            }
+            resolve(excercise);
           }
         );
+      }).then((data) => {
+        return new Promise((resolve, reject) => {
+          db.query(
+            "SELECT exercise_id FROM EXERCISES WHERE title = ? AND description = ? AND words_amount = ? AND professor_id = ? AND active='1' ",
+            [
+              this.title,
+              this.description,
+              this.words_amount,
+              this.professor_id,
+            ],
+            function (error, results, fields) {
+              if (error) {
+                reject(error);
+              }
+
+              if (results.length > 0) {
+                delete excercise.active;
+                excercise.exercise_id = results[results.length - 1].exercise_id;
+                resolve(excercise);
+              } else {
+                resolve();
+              }
+            }
+          );
+        });
       });
     });
   };
@@ -155,3 +171,4 @@ class Exercise {
 }
 
 module.exports = Exercise;
+
