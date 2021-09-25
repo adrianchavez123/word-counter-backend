@@ -22,6 +22,7 @@ CREATE TABLE GROUPS(
     student_id int null,
     name varchar(50) not null,
     active boolean not null,
+    token int,
     FOREIGN KEY (professor_id) REFERENCES PROFESSORS (professor_id),
     FOREIGN KEY (student_id) REFERENCES STUDENTS (student_id)
 )ENGINE = InnoDB;

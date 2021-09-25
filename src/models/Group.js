@@ -1,17 +1,75 @@
 const Connection = require("./Connection");
 
 class Group {
-  constructor({ professor_id, name, students }) {
+  constructor({ professor_id, name, students, token }) {
     this.professor_id = professor_id;
     this.name = name;
     this.students = students || [null];
+    this.token = token || 0;
   }
+  static join = (student_id, token) => {
+    const db = Connection.getInstance();
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, GROUPS.token, Groups.professor_id  " +
+          "FROM `GROUPS` " +
+          "WHERE `token` = ?  AND GROUPS.active='1' ",
+        [token],
+        function (error, results, fields) {
+          if (error) {
+            reject(error);
+          }
+          if (results.length > 0) {
+            return resolve(results);
+          }
+          resolve();
+        }
+      );
+    }).then((group) => {
+      if (!group) {
+        return resolve();
+      }
+      const [groupData] = group;
+      const registeredStudent = group
+        .map((g) => g.student_id)
+        .find((id) => +id === +student_id);
+
+      if (registeredStudent) {
+        return Promise.resolve({
+          message: `registered to group: ${groupData.name}`,
+        });
+      }
+      const registerStudent = [
+        groupData.group_id,
+        groupData.professor_id,
+        student_id,
+        groupData.name,
+        true,
+        token,
+      ];
+      return new Promise((resolve, reject) => {
+        db.query(
+          "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active,token) VALUES (?)",
+          [registerStudent],
+          function (error, results, fields) {
+            if (error) {
+              console.log(error);
+              return reject(error);
+            }
+            resolve({
+              message: `registered to group: ${groupData.name}`,
+            });
+          }
+        );
+      });
+    });
+  };
 
   static findById = (id) => {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.username  " +
+        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.username, GROUPS.token  " +
           "FROM `GROUPS` " +
           "LEFT  JOIN STUDENTS ON GROUPS.student_id = STUDENTS.student_id " +
           "WHERE `group_id` = ?  AND GROUPS.active='1' ",
@@ -28,6 +86,7 @@ class Group {
                 student_id: row.student_id,
                 username: row.username,
               })),
+              token: results[0].token,
             };
             return resolve(data);
           }
@@ -46,7 +105,7 @@ class Group {
 
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.username  " +
+        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.username, GROUPS.token  " +
           "FROM `GROUPS` " +
           "LEFT  JOIN STUDENTS ON GROUPS.student_id = STUDENTS.student_id " +
           "WHERE GROUPS.professor_id = ? AND GROUPS.active='1' ",
@@ -72,6 +131,7 @@ class Group {
                         student_id: row.student_id,
                         username: row.username,
                       })),
+                    token: group.token,
                   };
                 }),
               ],
@@ -136,14 +196,16 @@ class Group {
         student,
         this.name,
         true,
+        this.token,
       ]);
+
       const rowsArray =
         rows.length > 0
           ? rows
-          : [[group_id, this.professor_id, null, this.name, true]];
+          : [[group_id, this.professor_id, null, this.name, true, this.token]];
       return new Promise((resolve, reject) => {
         db.query(
-          "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active) VALUES ?",
+          "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active,token) VALUES ?",
           [rowsArray],
           function (error, results, fields) {
             if (error) {
@@ -168,10 +230,11 @@ class Group {
       return Promise.reject("You need provide an id number");
     }
     const db = Connection.getInstance();
+    const membersList = [...this.students];
     return new Promise((resolve, reject) => {
       db.query(
-        "UPDATE GROUPS SET name = ? WHERE group_id = ?",
-        [this.name, id],
+        "UPDATE GROUPS SET name = ? , token = ? WHERE group_id = ?",
+        [this.name, this.token, id],
         function (error, results, fields) {
           if (error) {
             reject(error);
@@ -179,7 +242,52 @@ class Group {
           resolve({ updated: true });
         }
       );
-    });
+    })
+      .then((data) => {
+        if (!data.updated) {
+          return resolve({ updated: true });
+        }
+        return new Promise((resolve, reject) => {
+          db.query(
+            "SELECT * FROM GROUPS where group_id = ?",
+            [id],
+            function (error, results, fields) {
+              if (error) {
+                reject(error);
+              }
+              const inactiveMembers = [];
+              results.forEach((g) => {
+                if (
+                  !membersList.includes(g.student_id) &&
+                  g.student_id !== null
+                ) {
+                  inactiveMembers.push(g.student_id);
+                }
+              });
+              resolve(inactiveMembers);
+            }
+          );
+        });
+      })
+      .then((inactiveMembers) => {
+        return new Promise((resolve, reject) => {
+          const ids = [...new Set(inactiveMembers)].join(",");
+          if (ids.length == 0) {
+            return resolve({ updated: true });
+          }
+          db.query(
+            `UPDATE GROUPS SET active = ? WHERE group_id = ? AND student_id IN (${ids})`,
+            [false, id],
+            function (error, results, fields) {
+              console.log(error);
+              if (error) {
+                return reject(error);
+              }
+              resolve({ updated: true });
+            }
+          );
+        });
+      });
   };
 }
 

@@ -9,6 +9,7 @@ router.post("", checkAuth, (req, res, next) => {
     professor_id: req.body.professor_id,
     name: req.body.name,
     students: req.body.students,
+    token: req.body.token,
   });
   group
     .save()
@@ -22,6 +23,22 @@ router.post("", checkAuth, (req, res, next) => {
     })
     .catch((error) => {
       res.status(500).json({ message: `Internal Server Error:${error}` });
+    });
+});
+
+router.get("/join/:student_id/:token", checkAuth, (req, res, next) => {
+  const student_id = req.params.student_id;
+  const token = req.params.token;
+  Group.join(student_id, token)
+    .then((group) => {
+      if (group) {
+        res.status(200).json(group);
+      } else {
+        res.status(404).json({ message: "Group not found!" });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "Internal Server Error" });
     });
 });
 
@@ -65,10 +82,12 @@ router.delete("/:id", checkAuth, (req, res, next) => {
 });
 
 router.put("/:id", checkAuth, (req, res, next) => {
-  // TODO: how to add an remove students
+  // TODO: disabled add, not easy way of knowing telegram ids
   const group = new Group({
     professor_id: req.body.professor_id,
     name: req.body.name,
+    token: req.body.token,
+    students: req.body.students,
   });
   group
     .update(+req.params.id)
