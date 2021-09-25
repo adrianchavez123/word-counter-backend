@@ -20,13 +20,15 @@ class Connection {
   static getInstance() {
     if (!Connection.db) {
       Connection.db = mysql.createConnection({
-        host: "localhost",
-        user: "root",
-        password: "my-secret-pw",
-        database: "WORD_COUNTER",
+        host: host,
+        user: user,
+        password: pwd,
+        database: database,
       });
+
       db.connect((error) => {
         if (error) {
+          console.log(error);
           // throw error;
         }
       });
@@ -36,3 +38,4 @@ class Connection {
 }
 
 module.exports = Connection;
+
