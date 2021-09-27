@@ -75,7 +75,13 @@ node -e "console.log('Running Node.js ' + process.version)"
 ``` 
 __Note__, its very likely that the nvm version is attached to current user that you are using during the installation meaing that if you change users, your nvm or node command won't be recognize and probably you'll need to update the path variable.
 
-### Installing MariaDB
+### Configure NodeJS application to start at startup
+Node JS applications can be managed by [pm2](https://www.npmjs.com/package/pm2), pm2 is process manager that is used to manage processes, it allow us to configure the application to run startup but also we can monitor the application and generate some logging file to make sure the application is performing correctly. pm2 can be installed globally with the following command.
+```
+sudo npm install pm2@latest -g
+```
+For more details about how to daemonize the application, plese go [here](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-20-04)
+
 
 ## Available Routes and their responses
 
