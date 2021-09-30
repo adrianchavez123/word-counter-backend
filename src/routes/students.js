@@ -8,6 +8,7 @@ router.post("", checkAuth, (req, res, next) => {
   const student = new Student({
     username: req.body.username,
     student_id: req.body.student_id,
+    id: +req.body.id,
   });
   student
     .save()
@@ -65,12 +66,17 @@ router.delete("/:id", checkAuth, (req, res, next) => {
 
 router.put("/:id", checkAuth, (req, res, next) => {
   const student = new Student({
+    student_id: req.body.student_id,
     username: req.body.username,
   });
   student
     .update(+req.params.id)
     .then((result) => {
-      res.status(200).json({ message: "Update successful!" });
+      if (result.updated) {
+        res.status(200).json({ message: "Update successful!" });
+      } else {
+        res.status(200).json({ message: "Update failed!" });
+      }
     })
     .catch((error) => {
       res.status(500).json({ message: `Internal Server Error: ${error}` });

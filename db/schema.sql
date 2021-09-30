@@ -11,7 +11,8 @@ CREATE TABLE PROFESSORS(
 
 
 CREATE TABLE STUDENTS(
-    student_id int not null PRIMARY KEY,
+    id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    student_id varchar(50) null,
     username varchar(50)not null,
     active boolean not null
 )ENGINE = InnoDB;
@@ -19,12 +20,11 @@ CREATE TABLE STUDENTS(
 CREATE TABLE GROUPS(
     group_id int NOT NULL,
     professor_id varchar(100) not null,
-    student_id int null,
+    student_id varchar(50) null,
     name varchar(50) not null,
     active boolean not null,
     token int,
-    FOREIGN KEY (professor_id) REFERENCES PROFESSORS (professor_id),
-    FOREIGN KEY (student_id) REFERENCES STUDENTS (student_id)
+    FOREIGN KEY (professor_id) REFERENCES PROFESSORS (professor_id)
 )ENGINE = InnoDB;
 
 
@@ -54,12 +54,11 @@ CREATE TABLE ASSIGNMENTS(
 CREATE TABLE DELIVER_ASSIGNMENTS(
     deliver_assignment_id int NOT NULL AUTO_INCREMENT PRIMARY KEY,
     assignment_id int not null,
-    student_id int not null,
+    student_id varchar(50),
     arrive_at date not null, 
     audio_URL varchar(250) not null,
     total_words_detected int null,
     active boolean not null,
     speech_to_text text null,
-    FOREIGN KEY (assignment_id) REFERENCES ASSIGNMENTS (assignment_id),
-    FOREIGN KEY (student_id) REFERENCES STUDENTS (student_id)
+    FOREIGN KEY (assignment_id) REFERENCES ASSIGNMENTS (assignment_id)
 )ENGINE = InnoDB;

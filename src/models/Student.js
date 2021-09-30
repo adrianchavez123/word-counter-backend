@@ -1,21 +1,22 @@
 const Connection = require("./Connection");
 
 class Professor {
-  constructor({ username, student_id }) {
+  constructor({ username, student_id, id }) {
     this.username = username;
     this.student_id = student_id;
+    this.id = id;
   }
 
   static findById = (id) => {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT STUDENTS.student_id, STUDENTS.username,GROUPS.group_id, GROUPS.name AS group_name, " +
+        "SELECT STUDENTS.id, STUDENTS.student_id,STUDENTS.username, GROUPS.group_id, GROUPS.name AS group_name, " +
           " ASSIGNMENTS.assignment_id, ASSIGNMENTS.due_date, EXERCISES.exercise_id, EXERCISES.title, EXERCISES.words_amount " +
           "FROM STUDENTS LEFT JOIN GROUPS ON STUDENTS.student_id = GROUPS.student_id " +
           "LEFT JOIN ASSIGNMENTS ON GROUPS.group_id = ASSIGNMENTS.group_id " +
           "LEFT JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id " +
-          "WHERE STUDENTS.student_id = ? AND STUDENTS.active = 1",
+          "WHERE STUDENTS.id = ? AND STUDENTS.active = 1",
         [id],
         function (error, results, fields) {
           if (error) {
@@ -25,6 +26,7 @@ class Professor {
             const assignments = [];
             const groups = [];
             const data = {
+              id: results[0].id,
               student_id: results[0].student_id,
               username: results[0].username,
               groups: results
@@ -83,7 +85,7 @@ class Professor {
 
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT STUDENTS.student_id, STUDENTS.username,GROUPS.group_id, GROUPS.name AS group_name " +
+        "SELECT STUDENTS.id,STUDENTS.student_id, STUDENTS.username,GROUPS.group_id, GROUPS.name AS group_name " +
           "FROM STUDENTS LEFT JOIN GROUPS ON STUDENTS.student_id = GROUPS.student_id " +
           "WHERE GROUPS.professor_id = ?",
         professor_id,
@@ -96,6 +98,7 @@ class Professor {
             const data = results
               .map((student) => {
                 return {
+                  id: student.id,
                   student_id: student.student_id,
                   username: student.username,
                   groups: results
@@ -138,7 +141,7 @@ class Professor {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "UPDATE STUDENTS SET active = ?  WHERE student_id = ?",
+        "UPDATE STUDENTS SET active = ?  WHERE id = ?",
         [false, id],
         function (error, results, fields) {
           if (error) {
@@ -218,13 +221,16 @@ class Professor {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "UPDATE STUDENTS SET username = ?  WHERE student_id = ?",
-        [this.username, id],
+        "UPDATE STUDENTS SET username = ? , student_id = ?  WHERE id = ?",
+        [this.username, this.student_id, id],
         function (error, results, fields) {
           if (error) {
             reject(error);
           }
-          resolve({ updated: true });
+          if (results && results.affectedRows === 1) {
+            return resolve({ updated: true });
+          }
+          return resolve({ updated: false });
         }
       );
     });

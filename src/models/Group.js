@@ -17,6 +17,7 @@ class Group {
         [token],
         function (error, results, fields) {
           if (error) {
+            console.log(error);
             return reject(error);
           }
           if (results?.length > 0) {
@@ -181,7 +182,8 @@ class Group {
           if (error) {
             reject(error);
           }
-          if (results.length > 0) {
+
+          if (results?.length > 0) {
             resolve(results[0].group_id);
           } else {
             resolve(0);
