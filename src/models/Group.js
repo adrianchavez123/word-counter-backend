@@ -195,11 +195,11 @@ class Group {
     }).then((last_id) => {
       const group_id = Number(last_id) + 1;
       const rows = this.students
-        .filter((student) => student.id !== null)
+        .filter((student) => student?.id !== null)
         .map((student) => [
           group_id,
           this.professor_id,
-          student.student_id,
+          student?.student_id,
           this.name,
           true,
           this.token,
@@ -209,7 +209,7 @@ class Group {
       const rowsArray =
         rows.length > 0
           ? rows
-          : [[group_id, this.professor_id, null, this.name, true, this.token]];
+          : [[group_id, this.professor_id, null, this.name, true, this.token,0]];
       return new Promise((resolve, reject) => {
         db.query(
           "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active,token,id) VALUES ?",
@@ -316,11 +316,11 @@ class Group {
         const rows = studentsToAddObject.map((student) => [
           id,
           this.professor_id,
-          student.student_id,
+          student?.student_id,
           this.name,
           true,
           this.token,
-          student.id,
+          student?.id,
         ]);
 
         const rowsArray = rows.length > 0 ? rows : [...row];
