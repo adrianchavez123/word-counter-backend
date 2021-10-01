@@ -68,6 +68,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
   const student = new Student({
     student_id: req.body.student_id,
     username: req.body.username,
+    students: req.body.students,
   });
   student
     .update(+req.params.id)

@@ -70,9 +70,9 @@ class Group {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.username, GROUPS.token  " +
+        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.id, STUDENTS.username, GROUPS.token  " +
           "FROM `GROUPS` " +
-          "LEFT  JOIN STUDENTS ON GROUPS.student_id = STUDENTS.student_id " +
+          "LEFT  JOIN STUDENTS ON GROUPS.id = STUDENTS.id " +
           "WHERE `group_id` = ?  AND GROUPS.active='1' ",
         [id],
         function (error, results, fields) {
@@ -86,6 +86,7 @@ class Group {
               students: results.map((row) => ({
                 student_id: row.student_id,
                 username: row.username,
+                id: row.id,
               })),
               token: results[0].token,
             };
@@ -106,9 +107,9 @@ class Group {
 
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.username, GROUPS.token  " +
+        "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.id,STUDENTS.username, GROUPS.token  " +
           "FROM `GROUPS` " +
-          "LEFT  JOIN STUDENTS ON GROUPS.student_id = STUDENTS.student_id " +
+          "LEFT  JOIN STUDENTS ON GROUPS.id = STUDENTS.id " +
           "WHERE GROUPS.professor_id = ? AND GROUPS.active='1' ",
         [professor_id],
         function (error, results, fields) {
@@ -131,6 +132,7 @@ class Group {
                       .map((row) => ({
                         student_id: row.student_id,
                         username: row.username,
+                        id: row.id,
                       })),
                     token: group.token,
                   };
@@ -192,14 +194,17 @@ class Group {
       );
     }).then((last_id) => {
       const group_id = Number(last_id) + 1;
-      const rows = this.students.map((student) => [
-        group_id,
-        this.professor_id,
-        student,
-        this.name,
-        true,
-        this.token,
-      ]);
+      const rows = this.students
+        .filter((student) => student.id !== null)
+        .map((student) => [
+          group_id,
+          this.professor_id,
+          student.student_id,
+          this.name,
+          true,
+          this.token,
+          0,
+        ]);
 
       const rowsArray =
         rows.length > 0
@@ -207,7 +212,7 @@ class Group {
           : [[group_id, this.professor_id, null, this.name, true, this.token]];
       return new Promise((resolve, reject) => {
         db.query(
-          "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active,token) VALUES ?",
+          "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active,token,id) VALUES ?",
           [rowsArray],
           function (error, results, fields) {
             if (error) {
@@ -232,7 +237,11 @@ class Group {
       return Promise.reject("You need provide an id number");
     }
     const db = Connection.getInstance();
-    const membersList = [...this.students];
+
+    const membersList = [
+      ...this.students.filter((st) => st.id !== null).map((st) => st.id),
+    ];
+
     return new Promise((resolve, reject) => {
       db.query(
         "UPDATE GROUPS SET name = ? , token = ? WHERE group_id = ?",
@@ -258,34 +267,74 @@ class Group {
                 reject(error);
               }
               const inactiveMembers = [];
+              const membersToAdd = [];
               results.forEach((g) => {
-                if (
-                  !membersList.includes(g.student_id) &&
-                  g.student_id !== null
-                ) {
-                  inactiveMembers.push(g.student_id);
+                if (!membersList.includes(g.id) && g.id !== null) {
+                  inactiveMembers.push(g.id);
                 }
               });
-              resolve(inactiveMembers);
+              const membersInDB = results.map((r) => r.id);
+              membersList.forEach((member) => {
+                if (!membersInDB.includes(member)) {
+                  membersToAdd.push(member);
+                }
+              });
+              resolve({
+                inactiveMembers: inactiveMembers,
+                membersToAdd: membersToAdd,
+              });
             }
           );
         });
       })
-      .then((inactiveMembers) => {
+      .then((entries) => {
         return new Promise((resolve, reject) => {
-          const ids = [...new Set(inactiveMembers)].join(",");
+          const ids = [...new Set(entries.inactiveMembers)].join(",");
           if (ids.length == 0) {
-            return resolve({ updated: true });
+            return resolve(entries.membersToAdd);
           }
           db.query(
-            `UPDATE GROUPS SET active = ? WHERE group_id = ? AND student_id IN (${ids})`,
+            `UPDATE GROUPS SET active = ? WHERE group_id = ? AND id IN (${ids})`,
             [false, id],
             function (error, results, fields) {
               console.log(error);
               if (error) {
                 return reject(error);
               }
-              resolve({ updated: true });
+              return resolve(entries.membersToAdd);
+            }
+          );
+        });
+      })
+      .then((membersToAdd) => {
+        if (membersToAdd.length == 0) {
+          return resolve({ updated: true });
+        }
+        const studentsToAddObject = this.students.filter((st) =>
+          membersToAdd.includes(st.id)
+        );
+        const rows = studentsToAddObject.map((student) => [
+          id,
+          this.professor_id,
+          student.student_id,
+          this.name,
+          true,
+          this.token,
+          student.id,
+        ]);
+
+        const rowsArray = rows.length > 0 ? rows : [...row];
+        return new Promise((resolve, reject) => {
+          db.query(
+            "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active,token, id) VALUES ?",
+            [rowsArray],
+            function (error, results, fields) {
+              if (error) {
+                reject(error);
+              }
+              resolve({
+                updated: true,
+              });
             }
           );
         });

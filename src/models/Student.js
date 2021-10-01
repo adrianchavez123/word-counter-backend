@@ -203,10 +203,27 @@ class Professor {
           if (error) {
             reject(error);
           }
-          delete student.active;
-          resolve(student);
+          resolve();
         }
       );
+    }).then(() => {
+      return new Promise((resolve, reject) => {
+        db.query(
+          "SELECT id from STUDENTS WHERE username = ? AND  active = ? ORDER BY id DESC LIMIT 1",
+          [this.username, true],
+          function (error, results, fields) {
+            if (error) {
+              return reject(error);
+            }
+            if (results) {
+              student.id = results[0].id;
+              delete student.active;
+              return resolve(student);
+            }
+            return reject(error);
+          }
+        );
+      });
     });
   };
 
@@ -233,6 +250,21 @@ class Professor {
           return resolve({ updated: false });
         }
       );
+    }).then(() => {
+      return new Promise((resolve, reject) => {
+        db.query(
+          "UPDATE GROUPS SET student_id =  ?  WHERE id = ?",
+          [this.student_id, id],
+          function (error, results, fields) {
+            if (error) {
+              console.log(error);
+              reject(error);
+            }
+
+            return resolve({ updated: true });
+          }
+        );
+      });
     });
   };
 }
