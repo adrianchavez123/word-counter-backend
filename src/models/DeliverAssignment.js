@@ -21,7 +21,7 @@ class DeliverAssignment {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT DELIVER_ASSIGNMENTS.deliver_assignment_id, DELIVER_ASSIGNMENTS.arrive_at, DELIVER_ASSIGNMENTS.audio_URL, " +
+        "SELECT STUDENTS.id,DELIVER_ASSIGNMENTS.deliver_assignment_id, DELIVER_ASSIGNMENTS.arrive_at, DELIVER_ASSIGNMENTS.audio_URL, " +
           "DELIVER_ASSIGNMENTS.total_words_detected, DELIVER_ASSIGNMENTS.speech_to_text, ASSIGNMENTS.assignment_id, ASSIGNMENTS.due_date," +
           "EXERCISES.exercise_id, EXERCISES.title, EXERCISES.description, EXERCISES.words_amount, " +
           "STUDENTS.student_id, STUDENTS.username " +
@@ -53,6 +53,7 @@ class DeliverAssignment {
               student: {
                 student_id: assignment.student_id,
                 username: assignment.username,
+                id: assignment.id,
               },
             }));
             resolve(data);
@@ -78,7 +79,7 @@ class DeliverAssignment {
 
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT DELIVER_ASSIGNMENTS.deliver_assignment_id, DELIVER_ASSIGNMENTS.arrive_at, DELIVER_ASSIGNMENTS.audio_URL, " +
+        "SELECT STUDENTS.id, DELIVER_ASSIGNMENTS.deliver_assignment_id, DELIVER_ASSIGNMENTS.arrive_at, DELIVER_ASSIGNMENTS.audio_URL, " +
           "DELIVER_ASSIGNMENTS.total_words_detected, DELIVER_ASSIGNMENTS.speech_to_text, ASSIGNMENTS.assignment_id, ASSIGNMENTS.due_date," +
           "EXERCISES.exercise_id, EXERCISES.title, EXERCISES.description, EXERCISES.words_amount, " +
           "STUDENTS.student_id, STUDENTS.username " +
@@ -110,6 +111,7 @@ class DeliverAssignment {
               student: {
                 student_id: assignment.student_id,
                 username: assignment.username,
+                id: assignment.id,
               },
             }));
             resolve(data);
