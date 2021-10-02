@@ -56,4 +56,7 @@ app.use("/api/professors", professorsRoutes);
 app.use("/api/students", studentsRoutes);
 app.use("/api/deliver-assignments", deliverAssignementsRoutes);
 
+app.use(function(req, res, next) {
+    return res.redirect('/');
+});
 module.exports = app;
