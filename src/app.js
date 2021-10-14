@@ -25,7 +25,14 @@ const upload = multer({ storage: storage });
 const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use("/images", express.static(path.join(__dirname, "../public/images")));
+app.use(
+  process.env.STATIC_IMAGE_URL,
+  express.static(path.join(__dirname, "../public/images"))
+);
+app.use(
+  process.env.STATIC_AUDIO_URL,
+  express.static(path.join(__dirname, "../public/audios"))
+);
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -56,7 +63,7 @@ app.use("/api/professors", professorsRoutes);
 app.use("/api/students", studentsRoutes);
 app.use("/api/deliver-assignments", deliverAssignementsRoutes);
 
-app.use(function(req, res, next) {
-    return res.redirect('/');
+app.use(function (req, res, next) {
+  return res.redirect("/");
 });
 module.exports = app;

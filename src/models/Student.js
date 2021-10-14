@@ -75,6 +75,74 @@ class Professor {
     });
   };
 
+  static findByChatId = (id) => {
+    const db = Connection.getInstance();
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT STUDENTS.id, STUDENTS.student_id,STUDENTS.username, GROUPS.group_id, GROUPS.name AS group_name, " +
+          " ASSIGNMENTS.assignment_id, ASSIGNMENTS.due_date, EXERCISES.exercise_id, EXERCISES.title, EXERCISES.words_amount " +
+          "FROM STUDENTS LEFT JOIN GROUPS ON STUDENTS.student_id = GROUPS.student_id " +
+          "LEFT JOIN ASSIGNMENTS ON GROUPS.group_id = ASSIGNMENTS.group_id " +
+          "LEFT JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id " +
+          "WHERE STUDENTS.student_id = ? AND STUDENTS.active = 1",
+        [id],
+        function (error, results, fields) {
+          if (error) {
+            reject(error);
+          }
+          if (results.length > 0) {
+            const assignments = [];
+            const groups = [];
+            const data = {
+              id: results[0].id,
+              student_id: results[0].student_id,
+              username: results[0].username,
+              groups: results
+                .map((row) => ({
+                  group_name: row.group_name,
+                  group_id: row.group_id,
+                }))
+                .filter((group) => {
+                  if (!group.group_id) {
+                    return false;
+                  }
+                  if (groups.includes(group.group_id)) {
+                    return false;
+                  } else {
+                    groups.push(group.group_id);
+                    return true;
+                  }
+                }),
+              assignments: results
+                .map((row) => ({
+                  title: row.title,
+                  exercise_id: row.exercise_id,
+                  words_amount: row.words_amount,
+                }))
+                .filter((assignment) => {
+                  if (!assignment.exercise_id) {
+                    return false;
+                  }
+                  if (assignments.includes(assignment.exercise_id)) {
+                    return false;
+                  } else {
+                    assignments.push(assignment.exercise_id);
+                    return true;
+                  }
+                }),
+            };
+            return resolve({
+              ...data,
+              groups: data.groups[0] ? data.groups : [],
+            });
+          } else {
+            resolve();
+          }
+        }
+      );
+    });
+  };
+
   static find = ({ professor_id }) => {
     const db = Connection.getInstance();
     let filters = "";

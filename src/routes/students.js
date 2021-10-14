@@ -39,6 +39,20 @@ router.get("/:id", checkAuth, (req, res, next) => {
     });
 });
 
+router.get("/chat_id/:id", checkAuth, (req, res, next) => {
+  Student.findByChatId(req.params.id)
+    .then((student) => {
+      if (student) {
+        res.status(200).json(student);
+      } else {
+        res.status(404).json({ message: "Student not found!" });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ message: "Internal Server Error" });
+    });
+});
+
 router.get("", checkAuth, (req, res, next) => {
   const professor_id = req.query.professor_id;
   Student.find({ professor_id })
