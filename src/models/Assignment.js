@@ -77,7 +77,7 @@ class Assignment {
               "ASSIGNMENTS " +
               "INNER JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id  " +
               "INNER JOIN PROFESSORS ON EXERCISES.professor_id = PROFESSORS.professor_id  " +
-              "WHERE PROFESSORS.professor_id = ? AND ASSIGNMENTS.active = 1 order by due_date desc LIMIT 1",
+              "WHERE PROFESSORS.professor_id = ? order by due_date desc LIMIT 1",
             [professor.professor_id],
             function (error, results, fields) {
               if (error) {
@@ -95,8 +95,8 @@ class Assignment {
       .then((assignment) => {
         return new Promise((resolve, reject) => {
           db.query(
-            "SELECT deliver_assignment_id,student_id,assignment_id FROM DELIVER_ASSIGNMENTS WHERE assignment_id = ?",
-            [assignment.assignment_id],
+            "SELECT deliver_assignment_id,student_id,assignment_id FROM DELIVER_ASSIGNMENTS WHERE assignment_id = ? and student_id = ?",
+            [assignment.assignment_id, student_id],
             function (error, results, fields) {
               if (error) {
                 reject(error);
