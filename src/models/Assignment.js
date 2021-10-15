@@ -73,7 +73,7 @@ class Assignment {
       .then((professor) => {
         return new Promise((resolve, reject) => {
           db.query(
-            "SELECT ASSIGNMENTS.assignment_id, due_date, ASSIGNMENTS.active FROM " +
+            "SELECT ASSIGNMENTS.assignment_id, due_date, ASSIGNMENTS.active, EXERCISES.title FROM " +
               "ASSIGNMENTS " +
               "INNER JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id  " +
               "INNER JOIN PROFESSORS ON EXERCISES.professor_id = PROFESSORS.professor_id  " +
