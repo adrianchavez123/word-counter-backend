@@ -7,7 +7,7 @@ class Group {
     this.students = students || [null];
     this.token = token || 0;
   }
-  static join = (student_id, token) => {
+  static join = (student_id, token, username) => {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
@@ -72,7 +72,7 @@ class Group {
       db.query(
         "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.id, STUDENTS.username, GROUPS.token  " +
           "FROM `GROUPS` " +
-          "LEFT  JOIN STUDENTS ON GROUPS.id = STUDENTS.id " +
+          "LEFT  JOIN STUDENTS ON GROUPS.student_id = STUDENTS.student_id " +
           "WHERE `group_id` = ?  AND GROUPS.active='1' ",
         [id],
         function (error, results, fields) {
@@ -109,7 +109,7 @@ class Group {
       db.query(
         "SELECT GROUPS.group_id, GROUPS.student_id, GROUPS.name, STUDENTS.id,STUDENTS.username, GROUPS.token  " +
           "FROM `GROUPS` " +
-          "LEFT  JOIN STUDENTS ON GROUPS.id = STUDENTS.id " +
+          "LEFT  JOIN STUDENTS ON GROUPS.student_id = STUDENTS.student_id " +
           "WHERE GROUPS.professor_id = ? AND GROUPS.active='1' ",
         [professor_id],
         function (error, results, fields) {
@@ -209,7 +209,17 @@ class Group {
       const rowsArray =
         rows.length > 0
           ? rows
-          : [[group_id, this.professor_id, null, this.name, true, this.token,0]];
+          : [
+              [
+                group_id,
+                this.professor_id,
+                null,
+                this.name,
+                true,
+                this.token,
+                0,
+              ],
+            ];
       return new Promise((resolve, reject) => {
         db.query(
           "INSERT INTO GROUPS (group_id,professor_id,student_id,name,active,token,id) VALUES ?",
@@ -239,7 +249,9 @@ class Group {
     const db = Connection.getInstance();
 
     const membersList = [
-      ...this.students.filter((st) => st.id !== null).map((st) => st.id),
+      ...this.students
+        .filter((st) => st.student_id !== null)
+        .map((st) => st.student_id),
     ];
 
     return new Promise((resolve, reject) => {
@@ -269,11 +281,15 @@ class Group {
               const inactiveMembers = [];
               const membersToAdd = [];
               results.forEach((g) => {
-                if (!membersList.includes(g.id) && g.id !== null) {
-                  inactiveMembers.push(g.id);
+                if (
+                  !membersList.includes(g.student_id) &&
+                  g.student_id !== null
+                ) {
+                  inactiveMembers.push(g.student_id);
                 }
               });
-              const membersInDB = results.map((r) => r.id);
+
+              const membersInDB = results.map((r) => r.student_id);
               membersList.forEach((member) => {
                 if (!membersInDB.includes(member)) {
                   membersToAdd.push(member);
@@ -289,12 +305,15 @@ class Group {
       })
       .then((entries) => {
         return new Promise((resolve, reject) => {
-          const ids = [...new Set(entries.inactiveMembers)].join(",");
+          const inactiveList = entries.inactiveMembers.map(
+            (entry) => `'${entry}'`
+          );
+          const ids = [...new Set(inactiveList)].join(",");
           if (ids.length == 0) {
             return resolve(entries.membersToAdd);
           }
           db.query(
-            `UPDATE GROUPS SET active = ? WHERE group_id = ? AND id IN (${ids})`,
+            `UPDATE GROUPS SET active = ? WHERE group_id = ? AND student_id IN (${ids})`,
             [false, id],
             function (error, results, fields) {
               console.log(error);
@@ -308,10 +327,10 @@ class Group {
       })
       .then((membersToAdd) => {
         if (membersToAdd.length == 0) {
-          return resolve({ updated: true });
+          return Promise.resolve({ updated: true });
         }
         const studentsToAddObject = this.students.filter((st) =>
-          membersToAdd.includes(st.id)
+          membersToAdd.includes(st.student_id)
         );
         const rows = studentsToAddObject.map((student) => [
           id,
