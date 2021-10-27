@@ -7,19 +7,21 @@ class DeliverAssignment {
     audio_URL,
     total_words_detected,
     speech_to_text,
+    arrive_at,
   }) {
     this.assignment_id = assignment_id;
     this.student_id = student_id;
     this.audio_URL = audio_URL;
     this.total_words_detected = total_words_detected;
     this.speech_to_text = speech_to_text;
+    this.arrive_at = arrive_at;
   }
 
   static findById = (id) => {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT DELIVER_ASSIGNMENTS.deliver_assignment_id, DELIVER_ASSIGNMENTS.arrive_at, DELIVER_ASSIGNMENTS.audio_URL, " +
+        "SELECT STUDENTS.id,DELIVER_ASSIGNMENTS.deliver_assignment_id, DELIVER_ASSIGNMENTS.arrive_at, DELIVER_ASSIGNMENTS.audio_URL, " +
           "DELIVER_ASSIGNMENTS.total_words_detected, DELIVER_ASSIGNMENTS.speech_to_text, ASSIGNMENTS.assignment_id, ASSIGNMENTS.due_date," +
           "EXERCISES.exercise_id, EXERCISES.title, EXERCISES.description, EXERCISES.words_amount, " +
           "STUDENTS.student_id, STUDENTS.username " +
@@ -51,6 +53,7 @@ class DeliverAssignment {
               student: {
                 student_id: assignment.student_id,
                 username: assignment.username,
+                id: assignment.id,
               },
             }));
             resolve(data);
@@ -76,7 +79,7 @@ class DeliverAssignment {
 
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT DELIVER_ASSIGNMENTS.deliver_assignment_id, DELIVER_ASSIGNMENTS.arrive_at, DELIVER_ASSIGNMENTS.audio_URL, " +
+        "SELECT STUDENTS.id, DELIVER_ASSIGNMENTS.deliver_assignment_id, DELIVER_ASSIGNMENTS.arrive_at, DELIVER_ASSIGNMENTS.audio_URL, " +
           "DELIVER_ASSIGNMENTS.total_words_detected, DELIVER_ASSIGNMENTS.speech_to_text, ASSIGNMENTS.assignment_id, ASSIGNMENTS.due_date," +
           "EXERCISES.exercise_id, EXERCISES.title, EXERCISES.description, EXERCISES.words_amount, " +
           "STUDENTS.student_id, STUDENTS.username " +
@@ -108,6 +111,7 @@ class DeliverAssignment {
               student: {
                 student_id: assignment.student_id,
                 username: assignment.username,
+                id: assignment.id,
               },
             }));
             resolve(data);
@@ -268,7 +272,7 @@ class DeliverAssignment {
     const deliverAssignment = {
       assignment_id: this.assignment_id,
       student_id: this.student_id,
-      arrive_at: new Date(),
+      arrive_at: this.arrive_at,
       audio_URL: this.audio_URL,
       total_words_detected: this.total_words_detected,
       speech_to_text: this.speech_to_text,
@@ -330,11 +334,10 @@ class DeliverAssignment {
     }
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
-      const arrive_at = new Date();
       db.query(
         "UPDATE DELIVER_ASSIGNMENTS SET arrive_at = ?, audio_URL = ?, total_words_detected = ?, speech_to_text = ? WHERE deliver_assignment_id = ?",
         [
-          arrive_at,
+          this.arrive_at,
           this.audio_URL,
           this.total_words_detected,
           this.speech_to_text,

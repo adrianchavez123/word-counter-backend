@@ -73,10 +73,11 @@ class Assignment {
       .then((professor) => {
         return new Promise((resolve, reject) => {
           db.query(
-            "SELECT ASSIGNMENTS.assignment_id, due_date, ASSIGNMENTS.active FROM " +
+            "SELECT ASSIGNMENTS.assignment_id, due_date, ASSIGNMENTS.active, EXERCISES.title FROM " +
               "ASSIGNMENTS " +
               "INNER JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id  " +
-              "WHERE ASSIGNMENTS.active = 1 order by due_date desc LIMIT 1",
+              "INNER JOIN PROFESSORS ON EXERCISES.professor_id = PROFESSORS.professor_id  " +
+              "WHERE PROFESSORS.professor_id = ? order by due_date desc LIMIT 1",
             [professor.professor_id],
             function (error, results, fields) {
               if (error) {
@@ -94,16 +95,17 @@ class Assignment {
       .then((assignment) => {
         return new Promise((resolve, reject) => {
           db.query(
-            "SELECT deliver_assignment_id,student_id,assignment_id FROM DELIVER_ASSIGNMENTS WHERE assignment_id = ?",
-            [assignment.assignment_id],
+            "SELECT deliver_assignment_id,student_id,assignment_id FROM DELIVER_ASSIGNMENTS WHERE assignment_id = ? and student_id = ?",
+            [assignment.assignment_id, student_id],
             function (error, results, fields) {
               if (error) {
                 reject(error);
               }
-              if (results.length === 1) {
+              if (results.length > 0) {
                 resolve({
                   ...assignment,
-                  deliver_assignment_id: results[0].deliver_assignment_id,
+                  deliver_assignment_id:
+                    results[results.length - 1].deliver_assignment_id,
                 });
               } else {
                 resolve({ ...assignment, deliver_assignment_id: null });
@@ -266,7 +268,9 @@ class Assignment {
           }
           if (results.length > 0) {
             notifyTemplate.students = [
-              ...results.map((result) => result.student_id),
+              ...results
+                .map((result) => result.student_id)
+                .filter((st) => st !== null),
             ];
             resolve(notifyTemplate);
           }

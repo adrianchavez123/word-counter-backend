@@ -1,16 +1,85 @@
 const Connection = require("./Connection");
 
 class Professor {
-  constructor({ username, student_id }) {
+  constructor({ username, student_id, id }) {
     this.username = username;
     this.student_id = student_id;
+    this.id = id;
   }
 
   static findById = (id) => {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT STUDENTS.student_id, STUDENTS.username,GROUPS.group_id, GROUPS.name AS group_name, " +
+        "SELECT STUDENTS.id, STUDENTS.student_id,STUDENTS.username, GROUPS.group_id, GROUPS.name AS group_name, " +
+          " ASSIGNMENTS.assignment_id, ASSIGNMENTS.due_date, EXERCISES.exercise_id, EXERCISES.title, EXERCISES.words_amount " +
+          "FROM STUDENTS LEFT JOIN GROUPS ON STUDENTS.student_id = GROUPS.student_id " +
+          "LEFT JOIN ASSIGNMENTS ON GROUPS.group_id = ASSIGNMENTS.group_id " +
+          "LEFT JOIN EXERCISES ON ASSIGNMENTS.exercise_id = EXERCISES.exercise_id " +
+          "WHERE STUDENTS.id = ? AND STUDENTS.active = 1",
+        [id],
+        function (error, results, fields) {
+          if (error) {
+            reject(error);
+          }
+          if (results.length > 0) {
+            const assignments = [];
+            const groups = [];
+            const data = {
+              id: results[0].id,
+              student_id: results[0].student_id,
+              username: results[0].username,
+              groups: results
+                .map((row) => ({
+                  group_name: row.group_name,
+                  group_id: row.group_id,
+                }))
+                .filter((group) => {
+                  if (!group.group_id) {
+                    return false;
+                  }
+                  if (groups.includes(group.group_id)) {
+                    return false;
+                  } else {
+                    groups.push(group.group_id);
+                    return true;
+                  }
+                }),
+              assignments: results
+                .map((row) => ({
+                  title: row.title,
+                  exercise_id: row.exercise_id,
+                  words_amount: row.words_amount,
+                }))
+                .filter((assignment) => {
+                  if (!assignment.exercise_id) {
+                    return false;
+                  }
+                  if (assignments.includes(assignment.exercise_id)) {
+                    return false;
+                  } else {
+                    assignments.push(assignment.exercise_id);
+                    return true;
+                  }
+                }),
+            };
+            return resolve({
+              ...data,
+              groups: data.groups[0] ? data.groups : [],
+            });
+          } else {
+            resolve();
+          }
+        }
+      );
+    });
+  };
+
+  static findByChatId = (id) => {
+    const db = Connection.getInstance();
+    return new Promise((resolve, reject) => {
+      db.query(
+        "SELECT STUDENTS.id, STUDENTS.student_id,STUDENTS.username, GROUPS.group_id, GROUPS.name AS group_name, " +
           " ASSIGNMENTS.assignment_id, ASSIGNMENTS.due_date, EXERCISES.exercise_id, EXERCISES.title, EXERCISES.words_amount " +
           "FROM STUDENTS LEFT JOIN GROUPS ON STUDENTS.student_id = GROUPS.student_id " +
           "LEFT JOIN ASSIGNMENTS ON GROUPS.group_id = ASSIGNMENTS.group_id " +
@@ -25,6 +94,7 @@ class Professor {
             const assignments = [];
             const groups = [];
             const data = {
+              id: results[0].id,
               student_id: results[0].student_id,
               username: results[0].username,
               groups: results
@@ -83,7 +153,7 @@ class Professor {
 
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT STUDENTS.student_id, STUDENTS.username,GROUPS.group_id, GROUPS.name AS group_name " +
+        "SELECT STUDENTS.id,STUDENTS.student_id, STUDENTS.username,GROUPS.group_id, GROUPS.name AS group_name " +
           "FROM STUDENTS LEFT JOIN GROUPS ON STUDENTS.student_id = GROUPS.student_id " +
           "WHERE GROUPS.professor_id = ?",
         professor_id,
@@ -96,6 +166,7 @@ class Professor {
             const data = results
               .map((student) => {
                 return {
+                  id: student.id,
                   student_id: student.student_id,
                   username: student.username,
                   groups: results
@@ -138,7 +209,7 @@ class Professor {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "UPDATE STUDENTS SET active = ?  WHERE student_id = ?",
+        "UPDATE STUDENTS SET active = ?  WHERE id = ?",
         [false, id],
         function (error, results, fields) {
           if (error) {
@@ -200,10 +271,27 @@ class Professor {
           if (error) {
             reject(error);
           }
-          delete student.active;
-          resolve(student);
+          resolve();
         }
       );
+    }).then(() => {
+      return new Promise((resolve, reject) => {
+        db.query(
+          "SELECT id from STUDENTS WHERE username = ? AND  active = ? ORDER BY id DESC LIMIT 1",
+          [this.username, true],
+          function (error, results, fields) {
+            if (error) {
+              return reject(error);
+            }
+            if (results) {
+              student.id = results[0].id;
+              delete student.active;
+              return resolve(student);
+            }
+            return reject(error);
+          }
+        );
+      });
     });
   };
 
@@ -218,15 +306,33 @@ class Professor {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "UPDATE STUDENTS SET username = ?  WHERE student_id = ?",
-        [this.username, id],
+        "UPDATE STUDENTS SET username = ? , student_id = ?  WHERE id = ?",
+        [this.username, this.student_id, id],
         function (error, results, fields) {
           if (error) {
             reject(error);
           }
-          resolve({ updated: true });
+          if (results && results.affectedRows === 1) {
+            return resolve({ updated: true });
+          }
+          return resolve({ updated: false });
         }
       );
+    }).then(() => {
+      return new Promise((resolve, reject) => {
+        db.query(
+          "UPDATE GROUPS SET student_id =  ?  WHERE id = ?",
+          [this.student_id, id],
+          function (error, results, fields) {
+            if (error) {
+              console.log(error);
+              reject(error);
+            }
+
+            return resolve({ updated: true });
+          }
+        );
+      });
     });
   };
 }
