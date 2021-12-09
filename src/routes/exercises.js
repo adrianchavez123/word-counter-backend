@@ -10,6 +10,7 @@ router.post("", checkAuth, (req, res, next) => {
     words_amount: req.body.words_amount,
     professor_id: req.body.professor_id,
     exercise_image: req.body.exercise_image,
+    content: req.body.content,
   });
   exercise.save().then((createdExercise) => {
     res.status(201).json({
@@ -68,6 +69,7 @@ router.put("/:id", checkAuth, (req, res, next) => {
     description: req.body.description,
     words_amount: req.body.words_amount,
     professor_id: req.body.professor_id,
+    content: req.body.content,
     // TODO: include image
   });
   exercise

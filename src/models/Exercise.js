@@ -9,19 +9,21 @@ class Exercise {
     words_amount,
     professor_id,
     exercise_image,
+    content,
   }) {
     this.title = title;
     this.description = description;
     this.words_amount = words_amount;
     this.professor_id = professor_id;
     this.exercise_image = exercise_image;
+    this.content = content;
   }
 
   static findById = (id) => {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT exercise_id, title, description, words_amount, professor_id, exercise_image FROM `EXERCISES` WHERE `exercise_id` = ?  AND active='1' ",
+        "SELECT exercise_id, title, description, words_amount, professor_id, exercise_image, content FROM `EXERCISES` WHERE `exercise_id` = ?  AND active='1' ",
         [id],
         function (error, results, fields) {
           if (error) {
@@ -47,7 +49,7 @@ class Exercise {
 
     return new Promise((resolve, reject) => {
       db.query(
-        "SELECT exercise_id, title, description, words_amount, professor_id, exercise_image FROM `EXERCISES` " +
+        "SELECT exercise_id, title, description, words_amount, professor_id, exercise_image, content FROM `EXERCISES` " +
           filters,
         [1],
         function (error, results, fields) {
@@ -90,10 +92,12 @@ class Exercise {
       professor_id: this.professor_id,
       exercise_image: this.exercise_image
         ? staticImageURL +
+          "/" +
           formatDate(Date.now()) +
           "_" +
           this.exercise_image.replace(/ /g, "_")
         : null,
+      content: this.content,
       active: true,
     };
     const db = Connection.getInstance();
@@ -103,7 +107,6 @@ class Exercise {
       }
       resolve();
     }).then((ip) => {
-      console.log("ip", ip);
       if (ip) {
         excercise.exercise_image = `http://${ip}:${port}${excercise.exercise_image}`;
       }
@@ -157,8 +160,8 @@ class Exercise {
     const db = Connection.getInstance();
     return new Promise((resolve, reject) => {
       db.query(
-        "UPDATE EXERCISES SET title = ?, description = ?,words_amount = ? WHERE exercise_id = ?",
-        [this.title, this.description, this.words_amount, id],
+        "UPDATE EXERCISES SET title = ?, description = ?,words_amount = ?, content = ? WHERE exercise_id = ?",
+        [this.title, this.description, this.words_amount, this.content, id],
         function (error, results, fields) {
           if (error) {
             reject(error);
@@ -171,4 +174,3 @@ class Exercise {
 }
 
 module.exports = Exercise;
-

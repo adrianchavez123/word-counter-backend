@@ -21,6 +21,7 @@ CREATE TABLE GROUPS(
     group_id int NOT NULL,
     professor_id varchar(100) not null,
     student_id varchar(50) null,
+    id int null,
     name varchar(50) not null,
     active boolean not null,
     token int,
@@ -35,6 +36,7 @@ CREATE TABLE EXERCISES(
     words_amount int null,
     professor_id varchar(100) not null,
     exercise_image varchar(250),
+    content text,
     active boolean not null,
     FOREIGN KEY (professor_id) REFERENCES PROFESSORS (professor_id)
 )ENGINE = InnoDB;
