@@ -62,7 +62,7 @@ class Assignment {
           if (error) {
             reject(error);
           }
-          if (results.length > 0) {
+          if (results?.length > 0) {
             resolve(results[0]);
           } else {
             return reject("student_id is not member of any group");
